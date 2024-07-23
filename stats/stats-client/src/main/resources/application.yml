@@ -1,0 +1,18 @@
+server:
+  port: 8080
+
+logging:
+  level:
+    httpclient:
+      wire: DEBUG
+    org:
+      springframework:
+        web:
+          client:
+            RestTemplate: DEBUG
+        apache:
+          http: DEBUG
+
+stats-server:
+  url: ${STATS_SERVER_URL:http://localhost:8080}
+

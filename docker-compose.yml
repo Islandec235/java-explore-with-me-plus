@@ -1,14 +1,64 @@
-services:
-  stats-server:
-    ports:
-      - "9090:9090"
+version: '3.8'
 
+services:
   stats-db:
     image: postgres:16.1
+    container_name: stat-db
+    ports:
+      - "5669:5432"
+    environment:
+      - POSTGRES_DB=stat-service-db
+      - POSTGRES_USER=test
+      - POSTGRES_PASSWORD=test
+
+    healthcheck:
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+      timeout: 5s
+      interval: 5s
+      retries: 10
+
+
+  stats-server:
+    build: stats-server
+    ports:
+      - "9091:9090"
+    depends_on:
+      - stats-db
+    environment:
+      - VALUE_PROFILE=test
+      - U_PORT=9090
+      - DB_NAME=stat-service-db
+      - POSTGRES_USER=test
+      - POSTGRES_PASSWORD=test
+      - DB_HOST=stats-db
+      - DB_PORT=5432
+    #      - TZ=Europe/Samara
+    #      - PGTZ=Europe/Samara
+
 
   ewm-service:
+    build: ewm-service
     ports:
-      - "8080:8080"
+      - "8081:8080"
+    depends_on:
+      - stats-server
+    environment:
+#      - EVM_SERVER_URL=http://ewm-db:9090
+      - STATS_SERVER_URL=http://stats-server:9090
 
-  ewm-db:
-    image: postgres:16.1
+#  ewm-db:
+#    image: postgres:16.1
+#    container_name: ewm-db
+#    ports:
+#      - "5669:5432"
+#    environment:
+#      - POSTGRES_DB=ewm-db
+#      - POSTGRES_USER=test
+#      - POSTGRES_PASSWORD=test
+#
+#    healthcheck:
+#      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+#      timeout: 5s
+#      interval: 5s
+#      retries: 10
+
