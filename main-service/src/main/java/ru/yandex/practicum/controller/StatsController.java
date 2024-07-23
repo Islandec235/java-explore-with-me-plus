@@ -3,6 +3,7 @@ package ru.yandex.practicum.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -35,9 +36,9 @@ public class StatsController {
 
     @PostMapping(CONTROLLER_HIT_PATH)
     @ResponseStatus(HttpStatus.CREATED)
-    public void saveNewStat(@RequestBody SaveStatsRequestDto saveStatsRequestDto) {
+    public StatsResponseDto saveNewStat(@RequestBody SaveStatsRequestDto saveStatsRequestDto) {
         log.info("Post stats {}", saveStatsRequestDto);
-        statClient.saveNewStat(saveStatsRequestDto);
+        return statClient.saveNewStat(saveStatsRequestDto);
     }
 
 }

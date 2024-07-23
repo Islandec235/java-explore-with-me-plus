@@ -14,12 +14,11 @@ import reactor.netty.tcp.TcpClient;
 
 import java.util.concurrent.TimeUnit;
 
-import static ru.yandex.practicum.related.Constants.TIMEOUT_CLIENT;
-
 @Configuration
 public class WebClientConfig {
 
     public static String BASE_URL;
+    public static final int TIMEOUT_CLIENT = 1000;
 
     public WebClientConfig(@Value("${stats-server.url:http://localhost:9090}") String BASE_URL) {
         WebClientConfig.BASE_URL = BASE_URL;

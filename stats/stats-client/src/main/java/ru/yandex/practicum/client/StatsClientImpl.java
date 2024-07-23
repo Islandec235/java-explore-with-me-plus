@@ -1,10 +1,10 @@
 package ru.yandex.practicum.client;
 
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
-import ru.yandex.practicum.client.StatsClient;
 import ru.yandex.practicum.dto.SaveStatsRequestDto;
 import ru.yandex.practicum.dto.StatsResponseDto;
 
@@ -35,13 +35,13 @@ public class StatsClientImpl implements StatsClient {
     }
 
     @Override
-    public String saveNewStat(SaveStatsRequestDto request) {
+    public StatsResponseDto saveNewStat(final SaveStatsRequestDto request) {
         return webClient
                 .post()
                 .uri(CONTROLLER_HIT_PATH)
                 .body(BodyInserters.fromValue(request))
                 .retrieve()
-                .bodyToMono(String.class)
+                .bodyToMono(StatsResponseDto.class)
                 .block();
     }
 }
