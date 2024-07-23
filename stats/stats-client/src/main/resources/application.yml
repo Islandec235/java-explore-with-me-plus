@@ -14,5 +14,5 @@ logging:
           http: DEBUG
 
 stats-server:
-  url: ${STATS_SERVER_URL:http://localhost:8080}
+  url: ${STATS_SERVER_URL:http://localhost:9090} # коннект к контроллеру stats-server
 

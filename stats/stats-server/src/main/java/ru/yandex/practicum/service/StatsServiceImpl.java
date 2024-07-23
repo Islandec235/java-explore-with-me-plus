@@ -14,21 +14,24 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class StatsServiceImpl {
+public class StatsServiceImpl implements StatsService {
     private final StatsRepository repository;
 
     @Transactional
+    @Override
     public Hit saveInfo(Hit hit) {
         hit.setTimestamp(LocalDateTime.now().withNano(0));
         return repository.save(hit);
     }
 
     @Transactional(readOnly = true)
+    @Override
     public List<Stat> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
-        if (unique) {
-            return repository.findAllWithUniqueIp(start, end, uris);
-        } else {
-            return repository.findAllWithoutUniqueIp(start, end, uris);
-        }
+//        if (unique) {
+//            return repository.findAllWithUniqueIp(start, end, uris);
+//        } else {
+//            return repository.findAllWithoutUniqueIp(start, end, uris);
+//        }
+        return null;
     }
 }

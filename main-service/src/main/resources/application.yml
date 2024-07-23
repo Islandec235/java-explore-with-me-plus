@@ -14,5 +14,5 @@ logging:
           http: DEBUG
 
 ewm-server:
-  url: ${EVM_SERVER_URL:http://localhost:8080}
+  url: ${EVM_SERVER_URL:http://localhost:8080} # для сервера к основной базе. Сейчас не используется
 

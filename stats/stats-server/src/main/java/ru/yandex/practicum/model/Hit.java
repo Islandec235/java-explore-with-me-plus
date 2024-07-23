@@ -20,11 +20,13 @@ import java.time.LocalDateTime;
 public class Hit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
     @Column(name = "app")
     private String app;
     @Column(name = "uri")
     private String uri;
+    @Column(name = "ip")
+    private String ip;
     @Column(name = "timestamp")
     private LocalDateTime timestamp;
 }

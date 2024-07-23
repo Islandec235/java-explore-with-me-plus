@@ -25,11 +25,11 @@ public class StatsController {
     private final StatsClient statClient;
 
     @GetMapping(CONTROLLER_STATS_PATH)
-    public StatsResponseDto getStats(@PathVariable String start,
-                                     @PathVariable String end,
-                                     @PathVariable List<String> uris,
-                                     @PathVariable Boolean unique) {
-        log.info("Get stats - start {}, end={}", start, end);
+    public StatsResponseDto getStats(@RequestParam String start,
+                                     @RequestParam String end,
+                                     @RequestParam List<String> uris,
+                                     @RequestParam Boolean unique) {
+        log.info("Get stats?start={}&end={}&uris={}&unique={}", start, end, uris, unique);
         return statClient.getStats(start, end, uris, unique);
     }
 

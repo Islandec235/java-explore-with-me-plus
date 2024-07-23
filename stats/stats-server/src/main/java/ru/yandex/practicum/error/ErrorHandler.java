@@ -14,7 +14,7 @@ import java.io.StringWriter;
 public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleThrowable(final Throwable e, HttpStatus status) {
+    public ErrorResponse handleThrowable(final Throwable e/*, HttpStatus status*/) {
         log.info("500 {}", e.getMessage(), e);
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);

@@ -16,14 +16,14 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleThrowable(final Throwable e, HttpStatus status) {
+    public ErrorResponse handleThrowable(final Throwable e) {
         log.error("Error Throwable 500 {}", e.getMessage());
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
         e.printStackTrace(pw);
         String stackTrace = sw.toString();
         return new ErrorResponse(
-                status, e.getMessage(), stackTrace
+                HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), stackTrace
         );
     }
 

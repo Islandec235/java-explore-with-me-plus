@@ -21,7 +21,7 @@ public class WebClientConfig {
 
     public static String BASE_URL;
 
-    public WebClientConfig(@Value("${stats-server.url}") String BASE_URL) {
+    public WebClientConfig(@Value("${stats-server.url:http://localhost:9090}") String BASE_URL) {
         WebClientConfig.BASE_URL = BASE_URL;
     }
 
