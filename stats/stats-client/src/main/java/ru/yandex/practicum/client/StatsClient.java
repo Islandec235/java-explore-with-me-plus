@@ -1,13 +1,14 @@
 package ru.yandex.practicum.client;
 
-import org.springframework.http.ResponseEntity;
-import ru.yandex.practicum.dto.SaveStatsRequestDto;
-import ru.yandex.practicum.dto.StatsResponseDto;
+import reactor.core.publisher.Mono;
+import ru.yandex.practicum.dto.StatCountHitsResponseDto;
+import ru.yandex.practicum.dto.StatsSaveRequestDto;
+import ru.yandex.practicum.dto.StatsResponseHitDto;
 
 import java.util.List;
 
 public interface StatsClient {
-    StatsResponseDto getStats(final String startTime, final String endTime, final List<String> uris, final Boolean unique);
+    List<StatCountHitsResponseDto> getStats(final String startTime, final String endTime, final List<String> uris, final Boolean unique);
 
-    StatsResponseDto saveNewStat(final SaveStatsRequestDto request);
+    Mono<StatsResponseHitDto> saveNewStat(final StatsSaveRequestDto request);
 }

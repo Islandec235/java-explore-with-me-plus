@@ -13,6 +13,7 @@
     <groupId>ru.yandex.practicum</groupId>
     <artifactId>stats-client</artifactId>
     <packaging>jar</packaging>
+    <version>0.0.1-SNAPSHOT</version>
 
     <name>stats-client</name>
     <url>http://maven.apache.org</url>
@@ -28,7 +29,8 @@
         <dependency>
             <groupId>ru.yandex.practicum</groupId>
             <artifactId>stats-dto</artifactId>
-            <version>${project.version}</version>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>

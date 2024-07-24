@@ -6,6 +6,8 @@ import io.netty.handler.timeout.WriteTimeoutHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.DefaultUriBuilderFactory;
@@ -17,11 +19,11 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 public class WebClientConfig {
 
-    public static String BASE_URL;
+    public String baseUrl;
     public static final int TIMEOUT_CLIENT = 1000;
 
-    public WebClientConfig(@Value("${stats-server.url:http://localhost:9090}") String BASE_URL) {
-        WebClientConfig.BASE_URL = BASE_URL;
+    public WebClientConfig(@Value("${stats-server.url:http://localhost:9090}") String baseUrl) {
+        this.baseUrl = baseUrl;
     }
 
     @Bean
@@ -34,13 +36,14 @@ public class WebClientConfig {
                     connection.addHandlerLast(new WriteTimeoutHandler(TIMEOUT_CLIENT, TimeUnit.MILLISECONDS));
                 });
 
-        DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(BASE_URL);
+        DefaultUriBuilderFactory factory = new DefaultUriBuilderFactory(baseUrl);
         factory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.URI_COMPONENT);
 
         return WebClient.builder()
                 .uriBuilderFactory(factory)
-                .baseUrl(BASE_URL)
+                .baseUrl(baseUrl)
                 .clientConnector(new ReactorClientHttpConnector(HttpClient.from(tcpClient)))
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .build();
     }
 }

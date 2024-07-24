@@ -1,13 +1,17 @@
 package ru.yandex.practicum.client;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
-import ru.yandex.practicum.dto.SaveStatsRequestDto;
-import ru.yandex.practicum.dto.StatsResponseDto;
+import reactor.core.publisher.Mono;
+import ru.yandex.practicum.dto.StatCountHitsResponseDto;
+import ru.yandex.practicum.dto.StatsResponseHitDto;
+import ru.yandex.practicum.dto.StatsSaveRequestDto;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static ru.yandex.practicum.related.Constants.CONTROLLER_HIT_PATH;
@@ -20,8 +24,8 @@ public class StatsClientImpl implements StatsClient {
     private final WebClient webClient;
 
     @Override
-    public StatsResponseDto getStats(final String startTime, final String endTime, final List<String> uris, final Boolean unique) {
-        return webClient
+    public List<StatCountHitsResponseDto> getStats(final String startTime, final String endTime, final List<String> uris, final Boolean unique) {
+        Object[] listObj = webClient
                 .get()
                 .uri(uriBuilder -> uriBuilder.path(CONTROLLER_STATS_PATH)
                         .queryParam("start", startTime)
@@ -30,18 +34,22 @@ public class StatsClientImpl implements StatsClient {
                         .queryParam("unique", unique)
                         .build())
                 .retrieve()
-                .bodyToMono(StatsResponseDto.class)
-                .block();
+                .bodyToMono(Object[].class).block();
+
+        ObjectMapper mapper = new ObjectMapper();
+        return Arrays.stream(listObj)
+                .map(object -> mapper.convertValue(object, StatCountHitsResponseDto.class))
+                .toList();
     }
 
     @Override
-    public StatsResponseDto saveNewStat(final SaveStatsRequestDto request) {
+    public Mono<StatsResponseHitDto> saveNewStat(final StatsSaveRequestDto request) {
         return webClient
                 .post()
                 .uri(CONTROLLER_HIT_PATH)
-                .body(BodyInserters.fromValue(request))
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(Mono.just(request), StatsResponseHitDto.class)
                 .retrieve()
-                .bodyToMono(StatsResponseDto.class)
-                .block();
+                .bodyToMono(StatsResponseHitDto.class);
     }
 }

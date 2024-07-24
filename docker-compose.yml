@@ -19,14 +19,14 @@ services:
 
 
   stats-server:
-    build: stats-server
+    build: stats/stats-server
     ports:
-      - "9091:9090"
+      - "9090:9090"
     depends_on:
       - stats-db
     environment:
-      - VALUE_PROFILE=test
-      - U_PORT=9090
+      - VALUE_PROFILE=dev
+      - SERVER_PORT=9090
       - DB_NAME=stat-service-db
       - POSTGRES_USER=test
       - POSTGRES_PASSWORD=test
@@ -37,9 +37,9 @@ services:
 
 
   ewm-service:
-    build: ewm-service
+    build: main-service
     ports:
-      - "8081:8080"
+      - "8080:8080"
     depends_on:
       - stats-server
     environment:

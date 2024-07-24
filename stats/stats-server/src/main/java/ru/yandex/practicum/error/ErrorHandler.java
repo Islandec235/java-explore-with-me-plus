@@ -20,7 +20,9 @@ public class ErrorHandler {
         PrintWriter pw = new PrintWriter(sw);
         e.printStackTrace(pw);
         String stackTrace = sw.toString();
-        return new ErrorResponse("Error ..." + e.getMessage() + stackTrace);
+        return new ErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), stackTrace
+        );
     }
 
 
