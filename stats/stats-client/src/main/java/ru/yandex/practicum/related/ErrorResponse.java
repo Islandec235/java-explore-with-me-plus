@@ -1,4 +1,4 @@
-package ru.yandex.practicum.error;
+package ru.yandex.practicum.related;
 
 import lombok.Getter;
 import lombok.Setter;

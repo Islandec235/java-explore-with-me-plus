@@ -2,26 +2,18 @@ package ru.yandex.practicum.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@Setter
-@Getter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class HitDto {
+public class StatsSaveRequestDto {
     private String app;
     private String uri;
     private String ip;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime timestamp;
-
-    public HitDto(String app, String uri, String ip) {
-        this.app = app;
-        this.uri = uri;
-        this.ip = ip;
-    }
 }

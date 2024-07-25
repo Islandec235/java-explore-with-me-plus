@@ -1,4 +1,4 @@
-package ru.yandex.practicum.error;
+package ru.yandex.practicum.related;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -9,13 +9,15 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-@RestControllerAdvice
+
 @Slf4j
+@RestControllerAdvice
 public class ErrorHandler {
+
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleThrowable(final Throwable e/*, HttpStatus status*/) {
-        log.info("500 {}", e.getMessage(), e);
+    public ErrorResponse handleThrowable(final Throwable e) {
+        log.error("Error Throwable 500 {}", e.getMessage());
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
         e.printStackTrace(pw);
@@ -24,6 +26,5 @@ public class ErrorHandler {
                 HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), stackTrace
         );
     }
-
 
 }

@@ -12,6 +12,11 @@
 
     <groupId>ru.yandex.practicum</groupId>
     <artifactId>stats-dto</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>stats-dto</name>
+    <url>http://maven.apache.org</url>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>

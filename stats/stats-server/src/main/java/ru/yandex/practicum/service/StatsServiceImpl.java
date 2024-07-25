@@ -4,31 +4,48 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.yandex.practicum.model.Hit;
+import ru.yandex.practicum.dto.*;
+import ru.yandex.practicum.mapper.StatsMapper;
 import ru.yandex.practicum.model.Stat;
 import ru.yandex.practicum.repository.StatsRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class StatsServiceImpl {
+public class StatsServiceImpl implements StatsService {
+
     private final StatsRepository repository;
+    private final StatsMapper statsMapper;
 
     @Transactional
-    public Hit saveInfo(Hit hit) {
-        hit.setTimestamp(LocalDateTime.now().withNano(0));
-        return repository.save(hit);
+    @Override
+    public StatsResponseHitDto saveInfo(StatsSaveRequestDto saveRequestDto) {
+        StatDto statDto = statsMapper.toStatDto(saveRequestDto);
+        Stat stat = statsMapper.toStat(statDto);
+        stat = repository.save(stat);
+
+        return statsMapper.toResponseDto(stat);
     }
 
     @Transactional(readOnly = true)
-    public List<Stat> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
+    @Override
+    public List<StatCountHitsResponseDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
+        List<StatCountHitsDto> listStats;
+
         if (unique) {
-            return repository.findAllWithUniqueIp(start, end, uris);
+            listStats = uris.isEmpty() ?
+                    repository.findAllWithUniqueIp(start, end) : repository.findWithUniqueIp(start, end, uris);
         } else {
-            return repository.findAllWithoutUniqueIp(start, end, uris);
+            listStats = uris.isEmpty() ?
+                    repository.findAllWithoutUniqueIp(start, end) : repository.findWithoutUniqueIp(start, end, uris);
         }
+
+        return listStats.stream()
+                .map(statsMapper::toCountHitsResponseDto)
+                .collect(Collectors.toList());
     }
 }
