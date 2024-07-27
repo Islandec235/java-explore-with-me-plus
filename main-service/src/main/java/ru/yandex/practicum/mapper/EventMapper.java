@@ -5,6 +5,7 @@ import org.mapstruct.Mapping;
 import ru.yandex.practicum.dto.event.EventFullDto;
 import ru.yandex.practicum.dto.event.EventShortDto;
 import ru.yandex.practicum.dto.event.NewEventDto;
+import ru.yandex.practicum.dto.event.UpdateUserEventRequest;
 import ru.yandex.practicum.model.Event;
 
 @Mapper(componentModel = "spring")
@@ -27,4 +28,9 @@ public interface EventMapper {
     @Mapping(target = "category", ignore = true)
     @Mapping(target = "location", ignore = true)
     Event toEvent(NewEventDto newEventDto);
+
+    @Mapping(target = "category", ignore = true)
+    @Mapping(target = "location", ignore = true)
+    @Mapping(target = "stateAction", ignore = true)
+    Event toEvent(UpdateUserEventRequest updateUserEvent);
 }

@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import ru.yandex.practicum.exception.ConflictException;
 import ru.yandex.practicum.exception.IncorrectDateException;
 import ru.yandex.practicum.exception.NotFoundException;
 
@@ -51,9 +52,9 @@ public class ErrorHandler {
         );
     }
 
-    @ExceptionHandler
+    @ExceptionHandler({IncorrectDateException.class, ConflictException.class})
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handleConflict(final IncorrectDateException e) {
+    public ErrorResponse handleConflict(final RuntimeException e) {
         log.error("Error 409 {}", e.getMessage());
         String localMessage = e.getLocalizedMessage();
         String classInit = Arrays.stream(e.getStackTrace()).findAny().get().toString();

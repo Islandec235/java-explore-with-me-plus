@@ -1,7 +1,6 @@
 package ru.yandex.practicum.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,12 +9,15 @@ import ru.yandex.practicum.dto.event.EventShortDto;
 import ru.yandex.practicum.dto.event.NewEventDto;
 import ru.yandex.practicum.dto.event.UpdateEventAdminRequest;
 import ru.yandex.practicum.dto.event.UpdateUserEventRequest;
+import ru.yandex.practicum.exception.ConflictException;
 import ru.yandex.practicum.exception.IncorrectDateException;
 import ru.yandex.practicum.exception.NotFoundException;
 import ru.yandex.practicum.mapper.EventMapper;
+import ru.yandex.practicum.mapper.UserMapper;
 import ru.yandex.practicum.model.Event;
 import ru.yandex.practicum.model.EventSort;
 import ru.yandex.practicum.model.EventState;
+import ru.yandex.practicum.model.Location;
 import ru.yandex.practicum.repository.CategoryRepository;
 import ru.yandex.practicum.repository.EventRepository;
 import ru.yandex.practicum.repository.UserRepository;
@@ -25,13 +27,13 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EventServiceImpl implements EventService {
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
     private final CategoryRepository categoryRepository;
+    private final UserMapper userMapper;
     private final EventMapper mapper;
 
     @Override
@@ -51,8 +53,6 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public EventFullDto createEvent(Long userId, NewEventDto eventDto) {
         if (!eventDto.getEventDate().isAfter(LocalDateTime.now().withNano(0).plusHours(2))) {
-            log.error("Событие не должно начинаться менее чем через 2 часа от текущего момента eventDate = {}",
-                    eventDto.getEventDate());
             throw new IncorrectDateException("Событие не должно начинаться менее чем через 2 часа от текущего момента");
         }
 
@@ -64,20 +64,60 @@ public class EventServiceImpl implements EventService {
                 .orElseThrow(() -> new NotFoundException("Пользователь с id = " + userId + "не найден")));
         event.setLat(event.getLat());
         event.setLon(event.getLon());
+        event.setState(EventState.PENDING);
 
-        return mapper.toEventFullDto(eventRepository.save(event));
+
+        return eventToDto(eventRepository.save(event));
     }
 
     @Override
     @Transactional(readOnly = true)
     public EventFullDto getEventByIdForUser(Long userId, Long eventId) {
-        return null;
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Событие с id = " + eventId + " не найдено"));
+        return eventToDto(event);
     }
 
     @Override
     @Transactional
     public EventFullDto userChangeEvent(Long userId, Long eventId, UpdateUserEventRequest eventDto) {
-        return null;
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Событие с id = " + eventId + " не найдено"));
+
+        if (event.getState() == EventState.PUBLISHED) {
+            throw new ConflictException("Событие опубликовано и не может быть изменено");
+        }
+
+        if (!eventDto.getEventDate().isAfter(LocalDateTime.now().withNano(0))) {
+            throw new IncorrectDateException("Событие не может начинаться раньше чем через 2 часа от текущего момента");
+        }
+
+        Event newEvent = mapper.toEvent(eventDto);
+        newEvent.setId(eventId);
+        newEvent.setInitiator(event.getInitiator());
+
+        if (eventDto.getCategory() != null) {
+            newEvent.setCategory(categoryRepository.findById(eventDto.getCategory())
+                    .orElseThrow(() ->
+                            new NotFoundException("Категория с id = " + eventDto.getCategory() + " не найдена")));
+        } else {
+            newEvent.setCategory(event.getCategory());
+        }
+
+        if (eventDto.getLocation() != null) {
+            newEvent.setLat(eventDto.getLocation().getLat());
+            newEvent.setLon(eventDto.getLocation().getLon());
+        }
+
+        switch (eventDto.getStateAction()) {
+            case REJECT_EVENT -> newEvent.setState(EventState.CANCELED);
+
+            case PUBLISH_EVENT ->  newEvent.setState(EventState.PUBLISHED);
+
+            default -> newEvent.setState(event.getState());
+        }
+
+        return eventToDto(eventRepository.save(newEvent));
     }
 
     @Override
@@ -118,5 +158,12 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public EventFullDto adminChangeEvent(Long eventId, UpdateEventAdminRequest eventDto) {
         return null;
+    }
+
+    private EventFullDto eventToDto(Event event) {
+        EventFullDto eventFullDto = mapper.toEventFullDto(event);
+        eventFullDto.setInitiator(userMapper.toUserShortDto(event.getInitiator()));
+        eventFullDto.setLocation(new Location(event.getLat(), event.getLon()));
+        return eventFullDto;
     }
 }
