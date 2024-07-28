@@ -37,7 +37,7 @@ public class Event {
     @Column(name = "event_date")
     private LocalDateTime eventDate;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "initiator_id")
     private User initiator;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "location_id")

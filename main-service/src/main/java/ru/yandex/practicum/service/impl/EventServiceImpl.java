@@ -25,6 +25,7 @@ import ru.yandex.practicum.service.EventService;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -39,7 +40,7 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional(readOnly = true)
     public List<EventShortDto> getEventsForUser(Long userId, Integer from, Integer size) {
-//        List<Event> events = eventRepository.findByUserId(userId, PageRequest.of(from / size, size));
+        List<Event> events = eventRepository.findByInitiatorId(userId, PageRequest.of(from / size, size));
         List<EventShortDto> eventsDto = new ArrayList<>();
 
 //        for (Event event : events) {
@@ -57,13 +58,13 @@ public class EventServiceImpl implements EventService {
         }
 
         Event event = mapper.toEvent(eventDto);
-//        event.setCategory(categoryRepository.findById(eventDto.getCategory())
-//                .orElseThrow(() -> new NotFoundException("Категория с id = " + eventDto.getCategory() + "не найдена")));
-//        event.setCreatedOn(LocalDateTime.now().withNano(0));
+        event.setCategory(categoryRepository.findById(eventDto.getCategory())
+                .orElseThrow(() -> new NotFoundException("Категория с id = " + eventDto.getCategory() + "не найдена")));
+        event.setCreatedOn(LocalDateTime.now().withNano(0));
         event.setInitiator(userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id = " + userId + "не найден")));
-//        event.setLat(event.getLat());
-//        event.setLon(event.getLon());
+        event.setLat(event.getLat());
+        event.setLon(event.getLon());
         event.setState(EventState.PENDING);
 
 
@@ -97,22 +98,22 @@ public class EventServiceImpl implements EventService {
         newEvent.setInitiator(event.getInitiator());
 
         if (eventDto.getCategory() != null) {
-//            newEvent.setCategory(categoryRepository.findById(eventDto.getCategory())
-//                    .orElseThrow(() ->
-//                            new NotFoundException("Категория с id = " + eventDto.getCategory() + " не найдена")));
+            newEvent.setCategory(categoryRepository.findById(eventDto.getCategory())
+                    .orElseThrow(() ->
+                            new NotFoundException("Категория с id = " + eventDto.getCategory() + " не найдена")));
         } else {
             newEvent.setCategory(event.getCategory());
         }
 
         if (eventDto.getLocation() != null) {
-//            newEvent.setLat(eventDto.getLocation().getLat());
-//            newEvent.setLon(eventDto.getLocation().getLon());
+            newEvent.setLat(eventDto.getLocation().getLat());
+            newEvent.setLon(eventDto.getLocation().getLon());
         }
 
         switch (eventDto.getStateAction()) {
-            case REJECT_EVENT -> newEvent.setState(EventState.CANCELED);
+            case CANCEL_REVIEW -> newEvent.setState(EventState.CANCELED);
 
-            case PUBLISH_EVENT ->  newEvent.setState(EventState.PUBLISHED);
+            case SEND_TO_REVIEW ->  newEvent.setState(EventState.PENDING);
 
             default -> newEvent.setState(event.getState());
         }
@@ -132,13 +133,21 @@ public class EventServiceImpl implements EventService {
             EventSort sort,
             Integer from,
             Integer size) {
-        return null;
+        //????
+        return Collections.emptyList();
     }
 
     @Override
     @Transactional(readOnly = true)
     public EventFullDto getEventById(Long id) {
-        return null;
+        Event event = eventRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Событие с id = " + id + " не найдено"));
+
+        if (event.getState() != EventState.PUBLISHED) {
+            throw new NotFoundException("Событие с id = " + id + " недоступно");
+        }
+
+        return mapper.toEventFullDto(event);
     }
 
     @Override
@@ -151,19 +160,56 @@ public class EventServiceImpl implements EventService {
             LocalDateTime rangeEnd,
             Integer from,
             Integer size) {
-        return null;
+        //????
+        return Collections.emptyList();
     }
 
     @Override
     @Transactional
     public EventFullDto adminChangeEvent(Long eventId, UpdateEventAdminRequest eventDto) {
-        return null;
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Событие с id = " + eventId + " не найдено"));
+
+        if (event.getState() == EventState.PUBLISHED) {
+            throw new ConflictException("Событие опубликовано и не может быть изменено");
+        }
+
+        if (!eventDto.getEventDate().isAfter(LocalDateTime.now().withNano(0))) {
+            throw new IncorrectDateException("Событие не может начинаться раньше чем через 2 часа от текущего момента");
+        }
+
+        Event newEvent = mapper.toEvent(eventDto);
+        newEvent.setId(eventId);
+        newEvent.setInitiator(event.getInitiator());
+
+        if (eventDto.getCategory() != null) {
+            newEvent.setCategory(categoryRepository.findById(eventDto.getCategory())
+                    .orElseThrow(() ->
+                            new NotFoundException("Категория с id = " + eventDto.getCategory() + " не найдена")));
+        } else {
+            newEvent.setCategory(event.getCategory());
+        }
+
+        if (eventDto.getLocation() != null) {
+            newEvent.setLat(eventDto.getLocation().getLat());
+            newEvent.setLon(eventDto.getLocation().getLon());
+        }
+
+        switch (eventDto.getStateAction()) {
+            case REJECT_EVENT -> newEvent.setState(EventState.CANCELED);
+
+            case PUBLISH_EVENT -> newEvent.setState(EventState.PUBLISHED);
+
+            default -> newEvent.setState(event.getState());
+        }
+
+        return eventToDto(eventRepository.save(newEvent));
     }
 
     private EventFullDto eventToDto(Event event) {
         EventFullDto eventFullDto = mapper.toEventFullDto(event);
         eventFullDto.setInitiator(userMapper.toUserShortDto(event.getInitiator()));
-//        eventFullDto.setLocation(new Location(event.getLat(), event.getLon()));
+        eventFullDto.setLocation(new Location(event.getLat(), event.getLon()));
         return eventFullDto;
     }
 }

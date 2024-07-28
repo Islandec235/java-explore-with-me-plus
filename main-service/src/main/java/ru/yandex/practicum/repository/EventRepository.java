@@ -7,6 +7,7 @@ import ru.yandex.practicum.model.Event;
 import java.util.List;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
-//    List<Event> findByUserId(Long userId, Pageable pageable); // не верно записан запрос
+    List<Event> findByInitiatorId(Long userId, Pageable pageable);
+
     List<Event> findByCategoryId(Integer catId);
 }

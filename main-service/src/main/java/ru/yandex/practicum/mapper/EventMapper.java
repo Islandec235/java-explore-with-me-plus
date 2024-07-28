@@ -2,23 +2,27 @@ package ru.yandex.practicum.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.springframework.beans.factory.annotation.Autowired;
 import ru.yandex.practicum.dto.event.EventFullDto;
 import ru.yandex.practicum.dto.event.EventShortDto;
 import ru.yandex.practicum.dto.event.NewEventDto;
+import ru.yandex.practicum.dto.event.UpdateEventAdminRequest;
 import ru.yandex.practicum.dto.event.UpdateUserEventRequest;
 import ru.yandex.practicum.model.Event;
 
 @Mapper(componentModel = "spring")
-public abstract class EventMapper {
+public interface EventMapper {
+    EventFullDto toEventFullDto(Event event);
 
+    @Mapping(target = "category", ignore = true)
+    @Mapping(target = "initiator", ignore = true)
+    EventShortDto toEventShortDto(Event event);
 
-    public abstract EventFullDto toEventFullDto(Event event);
+    @Mapping(target = "category", ignore = true)
+    Event toEvent(NewEventDto newEventDto);
 
-    public abstract EventShortDto toEventShortDto(Event event);
+    @Mapping(target = "category", ignore = true)
+    Event toEvent(UpdateUserEventRequest updateUserEvent);
 
-    @Mapping(target = "id", ignore = true)
-    public abstract Event toEvent(NewEventDto newEventDto);
-
-    public abstract Event toEvent(UpdateUserEventRequest updateUserEvent);
+    @Mapping(target = "category", ignore = true)
+    Event toEvent(UpdateEventAdminRequest updateEventAdmin);
 }

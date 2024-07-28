@@ -1,6 +1,7 @@
 package ru.yandex.practicum.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.dto.category.CategoryDto;
@@ -12,6 +13,9 @@ import ru.yandex.practicum.model.Category;
 import ru.yandex.practicum.repository.CategoryRepository;
 import ru.yandex.practicum.repository.EventRepository;
 import ru.yandex.practicum.service.CategoryService;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -48,5 +52,25 @@ public class CategoryServiceImpl implements CategoryService {
                 .orElseThrow(() -> new NotFoundException("Категория с id = " + catId + " не найдена"));
         category.setName(categoryDto.getName());
         return mapper.toCategoryDto(categoryRepository.save(category));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CategoryDto> getCategories(Integer from, Integer size) {
+        List<Category> categories = categoryRepository.findAll(PageRequest.of(from / size, size)).toList();
+        List<CategoryDto> categoriesDto = new ArrayList<>();
+
+        for (Category category : categories) {
+            categoriesDto.add(mapper.toCategoryDto(category));
+        }
+
+        return categoriesDto;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public CategoryDto getCategoryById(Integer catId) {
+        return mapper.toCategoryDto(categoryRepository.findById(catId)
+                .orElseThrow(() -> new NotFoundException("Категория с id = " + catId + " не найдена")));
     }
 }
