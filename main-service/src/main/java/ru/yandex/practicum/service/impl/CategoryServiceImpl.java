@@ -37,7 +37,6 @@ public class CategoryServiceImpl implements CategoryService {
                 throw new NotFoundException("Категория с id = " + catId + " не найдена");
             }
         } else {
-            log.error("Категория с id = {} не найдена", catId);
             throw new ConflictException("Категория с id = " + catId + " связана с событиями");
         }
     }

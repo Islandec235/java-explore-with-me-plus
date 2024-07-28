@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.yandex.practicum.model.Category;
 import ru.yandex.practicum.model.Location;
 import ru.yandex.practicum.model.StateAction;
 
@@ -15,7 +16,7 @@ import java.time.LocalDateTime;
 public class UpdateUserEventRequest {
     @Size(min = 20, max = 2000)
     private String annotation;
-    private Integer category;
+    private Category category;
     @Size(min = 20, max = 7000)
     private String description;
     private LocalDateTime eventDate;

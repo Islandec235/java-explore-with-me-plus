@@ -1,11 +1,20 @@
 package ru.yandex.practicum.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import jakarta.persistence.*;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
+@Entity
 @AllArgsConstructor
+@NoArgsConstructor
+@Table(name = "locations")
 public class Location {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(name = "lat")
     private Float lat;
+    @Column(name = "lon")
     private Float lon;
 }

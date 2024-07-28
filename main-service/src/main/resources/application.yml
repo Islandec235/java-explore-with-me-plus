@@ -1,17 +1,27 @@
 server:
   port: 8080
 
+spring:
+  profiles.active: ${VALUE_PROFILE:test}
+  jpa:
+    hibernate.ddl-auto: validate
+  properties:
+    hibernate:
+      dialect: org.hibernate.dialect.PostgreSQL10Dialect
+      format_sql: true
+  sql.init.mode: always
+
 logging:
   level:
     httpclient:
       wire: DEBUG
     org:
       springframework:
-        web:
-          client:
-            RestTemplate: DEBUG
-        apache:
-          http: DEBUG
+        orm:
+          jpa: INFO
+          jpa.JpaTransactionManager: DEBUG
+          transaction: INFO
+          transaction.interceptor: TRACE
 
 ewm-server:
   url: ${EVM_SERVER_URL:http://localhost:8080} # для сервера к основной базе. Сейчас не используется

@@ -7,5 +7,5 @@ import ru.yandex.practicum.model.User;
 import java.util.List;
 
 public interface UserRepository extends JpaRepository<User, Long> {
-    List<User> findAllById(List<Long> ids, Pageable pageable);
+//    List<User> findAllById(List<Long> ids, Pageable pageable);
 }

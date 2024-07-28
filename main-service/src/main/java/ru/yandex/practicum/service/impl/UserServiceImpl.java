@@ -24,13 +24,13 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public List<UserDto> getUsers(List<Long> ids, Integer from, Integer size) {
-        List<User> users;
+        List<User> users = new ArrayList<>();
         List<UserDto> usersDto = new ArrayList<>();
 
         if (ids == null) {
             users = repository.findAll(PageRequest.of(from / size, size)).toList();
         } else {
-            users = repository.findAllById(ids, PageRequest.of(from / size, size));
+//            users = repository.findAllById(ids, PageRequest.of(from / size, size));
         }
 
         for (User user : users) {

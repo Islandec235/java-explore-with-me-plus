@@ -1,6 +1,7 @@
 package ru.yandex.practicum.dto.user;
 
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,9 +13,9 @@ import lombok.NonNull;
 @NoArgsConstructor
 public class NewUserRequest {
     @Email
-    @NonNull
+    @NotNull
     private String email;
-    @NonNull
+    @NotNull
     @Size(min = 2, max = 250)
     private String name;
 }

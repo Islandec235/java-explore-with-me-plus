@@ -9,10 +9,11 @@ import ru.yandex.practicum.model.User;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
+
     UserDto toUserDto(User user);
 
+    @Mapping(target = "id", ignore = true)
     User toUser(NewUserRequest newUserRequest);
 
-    @Mapping(target = "email", ignore = true)
     UserShortDto toUserShortDto(User user);
 }

@@ -9,13 +9,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
@@ -32,7 +31,7 @@ public class Event {
     @Column(name = "confirmed_requests")
     private Integer confirmedRequests;
     @Column(name = "created_on")
-    private LocalDateTime createdOn;
+    private String createdOn;
     @Column(name = "description")
     private String description;
     @Column(name = "event_date")
@@ -40,18 +39,17 @@ public class Event {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User initiator;
-    @Column(name = "lat")
-    private Float lat;
-    @Column(name = "lon")
-    private Float lon;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "location_id")
+    private Location location;
     @Column(name = "paid")
     private Boolean paid;
     @Column(name = "participant_limit")
     private Integer participantLimit;
     @Column(name = "published_on")
-    private LocalDateTime publishedOn;
+    private String publishedOn;
     @Column(name = "request_moderation")
-    private Boolean requestModeration;
+    private Boolean requestModeration; // пре модерация. default: true
     @Column(name = "state")
     private EventState state;
     @Column(name = "title")

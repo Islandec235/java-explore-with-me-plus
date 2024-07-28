@@ -39,12 +39,12 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional(readOnly = true)
     public List<EventShortDto> getEventsForUser(Long userId, Integer from, Integer size) {
-        List<Event> events = eventRepository.findByUserId(userId, PageRequest.of(from / size, size));
+//        List<Event> events = eventRepository.findByUserId(userId, PageRequest.of(from / size, size));
         List<EventShortDto> eventsDto = new ArrayList<>();
 
-        for (Event event : events) {
-            eventsDto.add(mapper.toEventShortDto(event));
-        }
+//        for (Event event : events) {
+//            eventsDto.add(mapper.toEventShortDto(event));
+//        }
 
         return eventsDto;
     }
@@ -57,13 +57,13 @@ public class EventServiceImpl implements EventService {
         }
 
         Event event = mapper.toEvent(eventDto);
-        event.setCategory(categoryRepository.findById(eventDto.getCategory())
-                .orElseThrow(() -> new NotFoundException("Категория с id = " + eventDto.getCategory() + "не найдена")));
-        event.setCreatedOn(LocalDateTime.now().withNano(0));
+//        event.setCategory(categoryRepository.findById(eventDto.getCategory())
+//                .orElseThrow(() -> new NotFoundException("Категория с id = " + eventDto.getCategory() + "не найдена")));
+//        event.setCreatedOn(LocalDateTime.now().withNano(0));
         event.setInitiator(userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id = " + userId + "не найден")));
-        event.setLat(event.getLat());
-        event.setLon(event.getLon());
+//        event.setLat(event.getLat());
+//        event.setLon(event.getLon());
         event.setState(EventState.PENDING);
 
 
@@ -97,16 +97,16 @@ public class EventServiceImpl implements EventService {
         newEvent.setInitiator(event.getInitiator());
 
         if (eventDto.getCategory() != null) {
-            newEvent.setCategory(categoryRepository.findById(eventDto.getCategory())
-                    .orElseThrow(() ->
-                            new NotFoundException("Категория с id = " + eventDto.getCategory() + " не найдена")));
+//            newEvent.setCategory(categoryRepository.findById(eventDto.getCategory())
+//                    .orElseThrow(() ->
+//                            new NotFoundException("Категория с id = " + eventDto.getCategory() + " не найдена")));
         } else {
             newEvent.setCategory(event.getCategory());
         }
 
         if (eventDto.getLocation() != null) {
-            newEvent.setLat(eventDto.getLocation().getLat());
-            newEvent.setLon(eventDto.getLocation().getLon());
+//            newEvent.setLat(eventDto.getLocation().getLat());
+//            newEvent.setLon(eventDto.getLocation().getLon());
         }
 
         switch (eventDto.getStateAction()) {
@@ -163,7 +163,7 @@ public class EventServiceImpl implements EventService {
     private EventFullDto eventToDto(Event event) {
         EventFullDto eventFullDto = mapper.toEventFullDto(event);
         eventFullDto.setInitiator(userMapper.toUserShortDto(event.getInitiator()));
-        eventFullDto.setLocation(new Location(event.getLat(), event.getLon()));
+//        eventFullDto.setLocation(new Location(event.getLat(), event.getLon()));
         return eventFullDto;
     }
 }

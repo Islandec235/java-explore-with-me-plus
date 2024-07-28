@@ -11,9 +11,6 @@ import lombok.NonNull;
 @NoArgsConstructor
 public class UserDto {
     private Long id;
-    @Email
-    @NonNull
     private String email;
-    @NonNull
     private String name;
 }
