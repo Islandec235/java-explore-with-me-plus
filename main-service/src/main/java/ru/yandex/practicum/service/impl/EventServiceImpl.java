@@ -1,36 +1,22 @@
 package ru.yandex.practicum.service.impl;
 
-import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.client.StatsClient;
-import ru.yandex.practicum.client.StatsClient;
-import ru.yandex.practicum.dto.event.EventFullDto;
-import ru.yandex.practicum.dto.event.EventShortDto;
-import ru.yandex.practicum.dto.event.NewEventDto;
-import ru.yandex.practicum.dto.event.UpdateEventAdminRequest;
-import ru.yandex.practicum.dto.event.UpdateUserEventRequest;
-import ru.yandex.practicum.exception.ConflictException;
-import ru.yandex.practicum.exception.IncorrectDateException;
+import ru.yandex.practicum.dto.event.*;
 import ru.yandex.practicum.exception.NotFoundException;
 import ru.yandex.practicum.mapper.EventMapper;
 import ru.yandex.practicum.mapper.UserMapper;
-import ru.yandex.practicum.model.Event;
-import ru.yandex.practicum.model.EventParam;
-import ru.yandex.practicum.model.EventSearchParam;
-import ru.yandex.practicum.model.EventState;
+import ru.yandex.practicum.model.*;
 import ru.yandex.practicum.repository.CategoryRepository;
 import ru.yandex.practicum.repository.EventRepository;
 import ru.yandex.practicum.repository.UserRepository;
 import ru.yandex.practicum.service.EventService;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
-import static ru.yandex.practicum.model.QEvent.event;
 
 @Service
 @RequiredArgsConstructor
@@ -40,40 +26,81 @@ public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final CategoryRepository categoryRepository;
     private final UserMapper userMapper;
-    private final EventMapper mapper;
+    private final EventMapper eventMapper;
 
-    @Override
+    /*@Override
     @Transactional(readOnly = true)
     public List<EventShortDto> getEventsForUser(Long userId, Integer from, Integer size) {
         List<Event> events = eventRepository.findByInitiatorId(userId, PageRequest.of(from / size, size));
         List<EventShortDto> eventsDto = new ArrayList<>();
 
         for (Event event : events) {
-            eventsDto.add(mapper.toEventShortDto(event));
+            eventsDto.add(eventMapper.toEventShortDto(event));
         }
 
         return eventsDto;
+    }*/
+
+    @Override
+    public List<EventShortDto> getEventsForUser(Long userId, Integer from, Integer size) {
+        return null;
     }
 
     @Override
     @Transactional
     public EventFullDto createEvent(Long userId, NewEventDto eventDto) {
-        if (!eventDto.getEventDate().isAfter(LocalDateTime.now().withNano(0).plusHours(2))) {
-            throw new IncorrectDateException("Событие не должно начинаться менее чем через 2 часа от текущего момента");
-        }
+        User initiator = checkUserInDB(userId);
+        Category category = checkCategoryInDB(eventDto.getCategory());
+        Event event = eventMapper.toEvent(eventDto, category, initiator);
 
-        Event event = mapper.toEvent(eventDto);
-        event.setCategory(categoryRepository.findById(eventDto.getCategory())
-                .orElseThrow(() -> new NotFoundException("Категория с id = " + eventDto.getCategory() + "не найдена")));
         event.setCreatedOn(LocalDateTime.now().withNano(0));
-        event.setInitiator(userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с id = " + userId + "не найден")));
         event.setState(EventState.PENDING);
 
+        event = eventRepository.save(event);
 
-        return eventToDto(eventRepository.save(event));
+        return null;
     }
 
+    @Override
+    public EventFullDto getEventByIdForUser(Long userId, Long eventId) {
+        return null;
+    }
+
+    @Override
+    public EventFullDto changeEvent(Long userId, Long eventId, UpdateUserEventRequest eventDto) {
+        return null;
+    }
+
+    @Override
+    public List<EventShortDto> getEvents(EventParam param) {
+        return null;
+    }
+
+    @Override
+    public EventFullDto getEventById(Long id) {
+        return null;
+    }
+
+    @Override
+    public List<EventFullDto> searchEvents(EventSearchParam param) {
+        return null;
+    }
+
+    @Override
+    public EventFullDto changeEvent(Long eventId, UpdateEventAdminRequest eventDto) {
+        return null;
+    }
+
+    private User checkUserInDB(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id = " + userId + "не найден"));
+    }
+
+    private Category checkCategoryInDB(Long catId) {
+        return categoryRepository.findById(catId)
+                .orElseThrow(() -> new NotFoundException("Категория с id = " + catId + "не найдена"));
+    }
+/*
     @Override
     @Transactional(readOnly = true)
     public EventFullDto getEventByIdForUser(Long userId, Long eventId) {
@@ -96,7 +123,7 @@ public class EventServiceImpl implements EventService {
             throw new IncorrectDateException("Событие не может начинаться раньше чем через 2 часа от текущего момента");
         }
 
-        Event newEvent = mapper.toEvent(eventDto);
+        Event newEvent = eventMapper.toEvent(eventDto);
         newEvent.setId(eventId);
         newEvent.setInitiator(event.getInitiator());
 
@@ -111,7 +138,7 @@ public class EventServiceImpl implements EventService {
         switch (eventDto.getStateAction()) {
             case CANCEL_REVIEW -> newEvent.setState(EventState.CANCELED);
 
-            case SEND_TO_REVIEW ->  newEvent.setState(EventState.PENDING);
+            case SEND_TO_REVIEW -> newEvent.setState(EventState.PENDING);
 
             default -> newEvent.setState(event.getState());
         }
@@ -153,7 +180,7 @@ public class EventServiceImpl implements EventService {
         List<EventShortDto> eventsDto = new ArrayList<>();
 
         for (Event event : events) {
-            eventsDto.add(mapper.toEventShortDto(event));
+            eventsDto.add(eventMapper.toEventShortDto(event));
 
         }
 
@@ -223,7 +250,7 @@ public class EventServiceImpl implements EventService {
             throw new IncorrectDateException("Событие не может начинаться раньше чем через 2 часа от текущего момента");
         }
 
-        Event newEvent = mapper.toEvent(eventDto);
+        Event newEvent = eventMapper.toEvent(eventDto);
         newEvent.setId(eventId);
         newEvent.setInitiator(event.getInitiator());
 
@@ -238,7 +265,7 @@ public class EventServiceImpl implements EventService {
         switch (eventDto.getStateAction()) {
             case REJECT_EVENT -> newEvent.setState(EventState.CANCELED);
 
-            case PUBLISH_EVENT ->  newEvent.setState(EventState.PENDING);
+            case PUBLISH_EVENT -> newEvent.setState(EventState.PENDING);
 
             default -> newEvent.setState(event.getState());
         }
@@ -249,7 +276,7 @@ public class EventServiceImpl implements EventService {
     private EventFullDto eventToDto(Event event, boolean isTime) {
         if (isTime) {
             event.setViews(statsClient.getStats(event));
-            EventFullDto eventFullDto = mapper.toEventFullDto(event);
+            EventFullDto eventFullDto = eventMapper.toEventFullDto(event);
             eventFullDto.setInitiator(userMapper.toUserShortDto(event.getInitiator()));
             return eventFullDto;
         }
@@ -259,8 +286,8 @@ public class EventServiceImpl implements EventService {
                         LocalDateTime.MAX.toString(),
                         List.of("events/" + event.getId()),
                         false));
-        EventFullDto eventFullDto = mapper.toEventFullDto(event);
+        EventFullDto eventFullDto = eventMapper.toEventFullDto(event);
         eventFullDto.setInitiator(userMapper.toUserShortDto(event.getInitiator()));
         return eventFullDto;
-    }
+    }*/
 }

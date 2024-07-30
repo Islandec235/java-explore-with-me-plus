@@ -2,7 +2,7 @@ server:
   port: 8080
 
 spring:
-  profiles.active: ${VALUE_PROFILE:test}
+  profiles.active: ${VALUE_PROFILE:dev}
   jpa:
     hibernate-ddl-auto: validate
   properties:
