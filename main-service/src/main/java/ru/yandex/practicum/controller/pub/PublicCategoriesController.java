@@ -30,7 +30,7 @@ public class PublicCategoriesController {
     }
 
     @GetMapping("/{catId}")
-    public CategoryDto getCategoryById(@PathVariable Integer catId) {
+    public CategoryDto getCategoryById(@PathVariable Long catId) {
         log.info("Получение категории id = {}", catId);
         return service.getCategoryById(catId);
     }

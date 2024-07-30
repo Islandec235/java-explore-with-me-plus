@@ -23,9 +23,11 @@ import ru.yandex.practicum.service.CategoryService;
 @RequiredArgsConstructor
 @RequestMapping("/admin/categories")
 public class AdminCategoryController {
+
     private final CategoryService service;
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public CategoryDto createCategory(@RequestBody @Valid NewCategoryDto categoryDto) {
         log.info("Создание категории {}", categoryDto);
         return service.create(categoryDto);
@@ -33,14 +35,14 @@ public class AdminCategoryController {
 
     @DeleteMapping("/{catId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteCategory(@PathVariable Integer catId) {
+    public void deleteCategory(@PathVariable Long catId) {
         log.info("Удаление категории categoryId = {}", catId);
         service.delete(catId);
     }
 
     @PatchMapping("/{catId}")
     public CategoryDto changeCategory(
-            @PathVariable Integer catId,
+            @PathVariable Long catId,
             @RequestBody @Valid NewCategoryDto categoryDto) {
         return service.change(catId, categoryDto);
     }
