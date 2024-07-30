@@ -4,10 +4,10 @@ server:
 spring:
   profiles.active: ${VALUE_PROFILE:test}
   jpa:
-    hibernate.ddl-auto: validate
+    hibernate-ddl-auto: validate
   properties:
     hibernate:
-      dialect: org.hibernate.dialect.PostgreSQL10Dialect
+      dialect: org.hibernate.dialect.PostgreSQLDialect
       format_sql: true
   sql.init.mode: always
 

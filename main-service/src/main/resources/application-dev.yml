@@ -2,11 +2,10 @@ spring:
 
   jpa:
     show-sql: true
-    hibernate.ddl-auto: validate
+    hibernate-ddl-auto: validate
 
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:evm}
     username: ${POSTGRES_USER:postgres}
-<<<<<<< HEAD
     password: ${POSTGRES_PASSWORD:nulome}

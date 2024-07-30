@@ -14,7 +14,7 @@ import ru.yandex.practicum.client.StatsClient;
 import ru.yandex.practicum.dto.StatsSaveRequestDto;
 import ru.yandex.practicum.dto.event.EventFullDto;
 import ru.yandex.practicum.dto.event.EventShortDto;
-import ru.yandex.practicum.model.EventSort;
+import ru.yandex.practicum.model.EventParam;
 import ru.yandex.practicum.service.EventService;
 
 import java.time.LocalDateTime;
@@ -37,18 +37,17 @@ public class PublicEventController {
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
             @RequestParam(required = false, defaultValue = "false") Boolean onlyAvailable,
-            @RequestParam(required = false) EventSort sort,
             @RequestParam(required = false, defaultValue = "0") Integer from,
             @RequestParam(required = false, defaultValue = "10") Integer size,
-            HttpServletRequest request
-    ) {
+            HttpServletRequest request) {
         log.info("Получение событий");
         statsClient.saveNewStat(new StatsSaveRequestDto(
                 "emv-main-service",
                 request.getServletPath(),
                 request.getRemoteAddr(),
                 LocalDateTime.now()));
-        return service.getEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
+        EventParam param = new EventParam(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, from, size);
+        return service.getEvents(param);
     }
 
     @GetMapping("/{id}")

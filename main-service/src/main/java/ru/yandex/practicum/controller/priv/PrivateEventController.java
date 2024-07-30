@@ -59,6 +59,6 @@ public class PrivateEventController {
             @PathVariable Long eventId,
             @RequestBody UpdateUserEventRequest eventDto) {
         log.info("User change event {} userId = {}, eventId = {}", eventDto, userId, eventId);
-        return service.userChangeEvent(userId, eventId, eventDto);
+        return service.changeEvent(userId, eventId, eventDto);
     }
 }

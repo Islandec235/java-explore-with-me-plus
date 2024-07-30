@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public class UpdateUserEventRequest {
     @Size(min = 20, max = 2000)
     private String annotation;
-    private Category category;
+    private Integer category;
     @Size(min = 20, max = 7000)
     private String description;
     private LocalDateTime eventDate;

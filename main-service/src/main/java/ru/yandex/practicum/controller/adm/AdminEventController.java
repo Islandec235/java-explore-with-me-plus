@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.dto.event.EventFullDto;
 import ru.yandex.practicum.dto.event.UpdateEventAdminRequest;
+import ru.yandex.practicum.model.EventSearchParam;
 import ru.yandex.practicum.model.EventState;
 import ru.yandex.practicum.service.EventService;
 
@@ -29,7 +30,7 @@ public class AdminEventController {
 
     @GetMapping
     public List<EventFullDto> searchEvents(
-            @RequestParam(required = false) List<Integer> users,
+            @RequestParam(required = false) List<Long> users,
             @RequestParam(required = false) List<EventState> states,
             @RequestParam(required = false) List<Integer> categories,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
@@ -38,7 +39,8 @@ public class AdminEventController {
             @RequestParam(required = false, defaultValue = "10") Integer size
             ) {
         log.info("Admin search events");
-        return service.searchEvents(users, states, categories, rangeStart, rangeEnd, from, size);
+        EventSearchParam param = new EventSearchParam(users, states, categories, rangeStart, rangeEnd, from, size);
+        return service.searchEvents(param);
     }
 
     @PatchMapping("/{eventId}")
@@ -46,6 +48,6 @@ public class AdminEventController {
         @PathVariable Long eventId,
         @RequestBody UpdateEventAdminRequest eventDto) {
         log.info("Admin change event {} eventId = {}", eventDto, eventId);
-        return service.adminChangeEvent(eventId, eventDto);
+        return service.changeEvent(eventId, eventDto);
     }
 }

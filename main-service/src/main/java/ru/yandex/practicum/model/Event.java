@@ -8,7 +8,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedAttributeNode;
+import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -19,6 +22,13 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "events")
+@NamedEntityGraph(
+        name = "event-with-location-and-category",
+        attributeNodes = {
+                @NamedAttributeNode("location"),
+                @NamedAttributeNode("category")
+        }
+)
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,7 +41,7 @@ public class Event {
     @Column(name = "confirmed_requests")
     private Integer confirmedRequests;
     @Column(name = "created_on")
-    private String createdOn;
+    private LocalDateTime createdOn;
     @Column(name = "description")
     private String description;
     @Column(name = "event_date")
@@ -47,14 +57,13 @@ public class Event {
     @Column(name = "participant_limit")
     private Integer participantLimit;
     @Column(name = "published_on")
-    private String publishedOn;
+    private LocalDateTime publishedOn;
     @Column(name = "request_moderation")
     private Boolean requestModeration; // пре модерация. default: true
     @Column(name = "state")
     private EventState state;
     @Column(name = "title")
     private String title;
-    @Column(name = "views")
+    @Transient
     private Long views;
-
 }
