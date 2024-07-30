@@ -35,13 +35,13 @@ public class Event {
     private Long id;
     @Column(name = "annotation")
     private String annotation;
+    @Column(name = "description")
+    private String description;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
     @Column(name = "created_on")
     private LocalDateTime createdOn;
-    @Column(name = "description")
-    private String description;
     @Column(name = "event_date")
     private LocalDateTime eventDate;
     @ManyToOne(fetch = FetchType.LAZY)
@@ -62,6 +62,4 @@ public class Event {
     private EventState state;
     @Column(name = "title")
     private String title;
-    @Transient
-    private Long views;
 }

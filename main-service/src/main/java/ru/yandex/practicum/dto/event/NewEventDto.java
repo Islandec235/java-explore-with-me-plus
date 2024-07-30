@@ -1,5 +1,8 @@
 package ru.yandex.practicum.dto.event;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -22,6 +25,8 @@ public class NewEventDto {
     @NotNull
     @Size(min = 20, max = 7000)
     private String description;
+//    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @NotNull
     @ConstraintFutureInTwoHours
     private LocalDateTime eventDate;

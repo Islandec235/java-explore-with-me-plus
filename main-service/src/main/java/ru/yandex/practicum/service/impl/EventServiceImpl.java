@@ -11,6 +11,7 @@ import ru.yandex.practicum.mapper.UserMapper;
 import ru.yandex.practicum.model.*;
 import ru.yandex.practicum.repository.CategoryRepository;
 import ru.yandex.practicum.repository.EventRepository;
+import ru.yandex.practicum.repository.LocationRepository;
 import ru.yandex.practicum.repository.UserRepository;
 import ru.yandex.practicum.service.EventService;
 
@@ -23,6 +24,7 @@ import java.util.List;
 public class EventServiceImpl implements EventService {
     private final StatsClient statsClient;
     private final UserRepository userRepository;
+    private final LocationRepository locationRepository;
     private final EventRepository eventRepository;
     private final CategoryRepository categoryRepository;
     private final UserMapper userMapper;
@@ -51,14 +53,12 @@ public class EventServiceImpl implements EventService {
     public EventFullDto createEvent(Long userId, NewEventDto eventDto) {
         User initiator = checkUserInDB(userId);
         Category category = checkCategoryInDB(eventDto.getCategory());
-        Event event = eventMapper.toEvent(eventDto, category, initiator);
-
-        event.setCreatedOn(LocalDateTime.now().withNano(0));
-        event.setState(EventState.PENDING);
+        Location location = locationRepository.save(eventDto.getLocation());
+        Event event = eventMapper.toEvent(eventDto, initiator, category, location);
 
         event = eventRepository.save(event);
 
-        return null;
+        return eventMapper.toEventFullDto(event);
     }
 
     @Override

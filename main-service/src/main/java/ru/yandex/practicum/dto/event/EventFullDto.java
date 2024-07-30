@@ -25,9 +25,9 @@ public class EventFullDto {
     private UserShortDto initiator;
     private Location location;
     private Boolean paid;
-    private Integer participantLimit = 0;
+    private Integer participantLimit;
     private LocalDateTime publishedOn;
-    private Boolean requestModeration = true;
+    private Boolean requestModeration;
     private EventState state;
     private String title;
     private Long views;
