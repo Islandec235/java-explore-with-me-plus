@@ -36,7 +36,7 @@ create TABLE IF NOT EXISTS events (
     participant_limit integer DEFAULT 0 NOT NULL,
     published_on TIMESTAMP,
     request_moderation BOOLEAN DEFAULT true NOT NULL,
-    state VARCHAR NOT NULL,
+    state VARCHAR(30) NOT NULL,
     title VARCHAR(120) NOT NULL
 );
 

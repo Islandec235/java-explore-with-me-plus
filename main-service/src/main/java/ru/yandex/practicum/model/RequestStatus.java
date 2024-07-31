@@ -2,6 +2,7 @@ package ru.yandex.practicum.model;
 
 public enum RequestStatus {
     PENDING,
-    APPROVED,
+    CONFIRMED,
+    REJECTED,
     CANCELED
 }

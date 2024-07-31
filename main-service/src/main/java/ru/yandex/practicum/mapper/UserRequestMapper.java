@@ -35,7 +35,7 @@ public abstract class UserRequestMapper {
     @Named("setStatus")
     RequestStatus setStatus(Event event) {
         if(!event.getRequestModeration()){
-            return RequestStatus.APPROVED;
+            return RequestStatus.CONFIRMED;
         }
         return RequestStatus.PENDING;
     }

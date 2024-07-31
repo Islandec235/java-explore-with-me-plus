@@ -17,13 +17,14 @@ public class UserRequest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "event_id")
     private Event event;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "requester_id")
     private User requester;
     @Column(name = "status", nullable = false)
+    @Enumerated(EnumType.STRING)
     private RequestStatus status;
     @Column(name = "created", nullable = false)
     private LocalDateTime created;

@@ -1,6 +1,5 @@
 package ru.yandex.practicum.service;
 
-import ru.yandex.practicum.dto.request.ParticipationRequestDto;
 import ru.yandex.practicum.dto.user.NewUserRequest;
 import ru.yandex.practicum.dto.user.UserDto;
 
@@ -13,9 +12,4 @@ public interface UserService {
 
     void delete(Long id);
 
-    List<ParticipationRequestDto> getRequestByUser(Long userId);
-
-    ParticipationRequestDto createRequestByUser(Long userId, Long eventId);
-
-    ParticipationRequestDto cancelRequestByUser(Long userId, Long requestId);
 }

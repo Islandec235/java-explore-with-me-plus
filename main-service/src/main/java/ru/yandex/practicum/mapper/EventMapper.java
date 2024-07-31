@@ -1,13 +1,8 @@
 package ru.yandex.practicum.mapper;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Named;
+import org.mapstruct.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import ru.yandex.practicum.dto.event.EventFullDto;
-import ru.yandex.practicum.dto.event.EventShortDto;
-import ru.yandex.practicum.dto.event.NewEventDto;
-import ru.yandex.practicum.dto.event.UpdateUserEventRequest;
+import ru.yandex.practicum.dto.event.*;
 import ru.yandex.practicum.model.*;
 
 import java.time.LocalDateTime;
@@ -36,6 +31,25 @@ public abstract class EventMapper {
     @Mapping(target = "createdOn", expression = "java(setCreatedOnNow())")
     @Mapping(target = "state", expression = "java(setCreateState())")
     public abstract Event toEvent(NewEventDto newEventDto, User user, Category category, Location location);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
+            nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+    @Mapping(target = "category", ignore = true)
+    @Mapping(target = "location", ignore = true)
+    @Mapping(target = "state", ignore = true)
+    public abstract void updateEventFromEventDto(@MappingTarget Event event, UpdateUserEventRequest updateDto);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
+            nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+    @Mapping(target = "category", ignore = true)
+    @Mapping(target = "location", ignore = true)
+    @Mapping(target = "state", ignore = true)
+    public abstract void updEventForAdminEventDto(@MappingTarget Event event, UpdateEventAdminRequest updateDto);
+
+
+    /*@BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
+            nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+    void updateItemFromItemDto(ItemDto itemDto, @MappingTarget Item item);*/
 
 //    Event toEvent(NewEventDto newEventDto);
 

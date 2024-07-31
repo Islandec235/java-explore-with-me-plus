@@ -71,20 +71,20 @@ public class ErrorHandler {
         );
     }
 
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleThrowable(final Throwable e) {
-        log.error("Error Throwable 500 {}", e.getMessage());
-        String localMessage = e.getLocalizedMessage();
-        String classInit = Arrays.stream(e.getStackTrace()).findAny().get().toString();
-
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-        e.printStackTrace(pw);
-        String stackTrace = sw.toString();
-
-        return new ErrorResponse(
-                HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), localMessage, classInit, stackTrace
-        );
-    }
+//    @ExceptionHandler
+//    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+//    public ErrorResponse handleThrowable(final Throwable e) {
+//        log.error("Error Throwable 500 {}", e.getMessage());
+//        String localMessage = e.getLocalizedMessage();
+//        String classInit = Arrays.stream(e.getStackTrace()).findAny().get().toString();
+//
+//        StringWriter sw = new StringWriter();
+//        PrintWriter pw = new PrintWriter(sw);
+//        e.printStackTrace(pw);
+//        String stackTrace = sw.toString();
+//
+//        return new ErrorResponse(
+//                HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), localMessage, classInit, stackTrace
+//        );
+//    }
 }
