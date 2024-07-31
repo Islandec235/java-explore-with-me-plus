@@ -43,7 +43,7 @@ services:
     depends_on:
       - stats-server
     environment:
-#      - EVM_SERVER_URL=http://ewm-db:9090
+      #      - EVM_SERVER_URL=http://ewm-db:9090
       - STATS_SERVER_URL=http://stats-server:9090
 
 #  ewm-db:
@@ -61,4 +61,3 @@ services:
 #      timeout: 5s
 #      interval: 5s
 #      retries: 10
-
