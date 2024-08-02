@@ -10,7 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 public class EventParam {
     private String text;
-    private List<Integer> categories;
+    private List<Long> categories;
     private Boolean paid;
     private LocalDateTime rangeStart;
     private LocalDateTime rangeEnd;
@@ -21,7 +21,6 @@ public class EventParam {
     public boolean isText() {
         return text != null;
     }
-
     public boolean isCategories() {
         return categories != null;
     }

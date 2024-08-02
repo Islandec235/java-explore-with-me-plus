@@ -55,7 +55,7 @@ public class PrivateEventController {
     public EventFullDto userChangeEvent(
             @PathVariable Long userId,
             @PathVariable Long eventId,
-            @RequestBody UpdateUserEventRequest eventDto) {
+            @RequestBody @Valid UpdateUserEventRequest eventDto) {
         log.info("Patch User change event {} userId = {}, eventId = {}", eventDto, userId, eventId);
         return eventService.changeEvent(userId, eventId, eventDto);
     }
@@ -72,6 +72,14 @@ public class PrivateEventController {
     public EventRequestStatusUpdateResult requestUpdateStatus (@PathVariable Long userId,
                                                                @PathVariable Long eventId,
             @RequestBody @Valid EventRequestStatusUpdateRequest statusUpdateRequest) {
+        log.info("Patch request change update {} ", statusUpdateRequest);
+        return eventService.requestUpdateStatus(userId, eventId, statusUpdateRequest);
+    }
+
+    @PatchMapping("/{eventId}/requests/")
+    public EventRequestStatusUpdateResult requestUpdateStatus_Patch (@PathVariable Long userId,
+                                                               @PathVariable Long eventId,
+                                                               @RequestBody @Valid EventRequestStatusUpdateRequest statusUpdateRequest) {
         log.info("Patch request change update {} ", statusUpdateRequest);
         return eventService.requestUpdateStatus(userId, eventId, statusUpdateRequest);
     }

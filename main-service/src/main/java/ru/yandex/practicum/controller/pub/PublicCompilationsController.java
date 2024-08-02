@@ -23,7 +23,7 @@ public class PublicCompilationsController {
     @GetMapping
     public List<CompilationDto> getCompilations(@RequestParam(value = "pinned", defaultValue = "false") Boolean pinned,
                                                 @RequestParam(value = "from", defaultValue = "0") @Min(0) int from,
-                                                @RequestParam(value = "size", defaultValue = "10") @Min(3) @Max(50) int size) {
+                                                @RequestParam(value = "size", defaultValue = "10") @Min(1) int size) {
         log.info("Get compilations with pinned={}, page-from={}, page-size={}", pinned, from, size);
         return service.getCompilations(pinned, from, size);
     }

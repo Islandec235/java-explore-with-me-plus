@@ -4,6 +4,7 @@ import ru.yandex.practicum.dto.event.*;
 import ru.yandex.practicum.dto.request.EventRequestStatusUpdateRequest;
 import ru.yandex.practicum.dto.request.EventRequestStatusUpdateResult;
 import ru.yandex.practicum.dto.request.ParticipationRequestDto;
+import ru.yandex.practicum.model.EventParam;
 
 import java.util.List;
 
@@ -28,4 +29,10 @@ public interface EventService {
                                                        EventRequestStatusUpdateRequest statusUpdateRequest);
 
     EventFullDto changeEvent(Long eventId, UpdateEventAdminRequest eventDto);
+
+    List<EventFullDto> searchEvents(EventSearchParam param);
+
+    List<EventShortDto> getEvents(EventParam param);
+
+    EventFullDto getEventById(Long id);
 }

@@ -10,6 +10,6 @@ public class ConstraintFutureInTwoHoursValidation implements ConstraintValidator
     @Override
     public boolean isValid(LocalDateTime localDateTime, ConstraintValidatorContext constraintValidatorContext) {
 
-        return localDateTime.isAfter(LocalDateTime.now().withNano(0).plusHours(2));
+        return localDateTime == null || localDateTime.isAfter(LocalDateTime.now().withNano(0).plusHours(2));
     }
 }

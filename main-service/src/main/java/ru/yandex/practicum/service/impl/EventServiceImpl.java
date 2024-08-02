@@ -1,10 +1,12 @@
 package ru.yandex.practicum.service.impl;
 
+import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.client.StatsClient;
+import ru.yandex.practicum.dto.StatCountHitsResponseDto;
 import ru.yandex.practicum.dto.event.*;
 import ru.yandex.practicum.dto.request.EventRequestStatusUpdateRequest;
 import ru.yandex.practicum.dto.request.EventRequestStatusUpdateResult;
@@ -18,11 +20,12 @@ import ru.yandex.practicum.repository.*;
 import ru.yandex.practicum.service.EventService;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toList;
+import static ru.yandex.practicum.model.QEvent.event;
 
 
 @Service
@@ -90,6 +93,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Transactional
     public ParticipationRequestDto createRequestByUser(Long userId, Long eventId) {
         User user = checkUserInDataBase(userId);
         Event event = checkEventInDB(eventId);
@@ -116,44 +120,52 @@ public class EventServiceImpl implements EventService {
         List<UserRequest> userRequest = requestRepository.findAllByRequesterIdAndEventId(userId, eventId);
         return userRequest.stream()
                 .map(userRequestMapper::toPartRequestDto)
-                .collect(toList());
+                .collect(Collectors.toList());
+    }
+
+    private EventRequestStatusUpdateResult verificationUserRequestAndUpdate(Long eventId, List<UserRequest> listRequest, RequestStatus status) {
+        EventRequestStatusUpdateResult result = new EventRequestStatusUpdateResult(new ArrayList<>(), new ArrayList<>());
+        for (UserRequest request : listRequest) {
+            if (request.getStatus() != RequestStatus.PENDING) {
+                throw new ConflictException("Статус можно изменить только у заявок, находящихся в состоянии ожидания");
+            }
+            long countRequest = requestRepository.countByStatusAndEventId(RequestStatus.CONFIRMED, eventId);
+
+            Event event = request.getEvent();
+            if (countRequest >= event.getParticipantLimit()) {
+                throw new ConflictException("Нельзя подтвердить заявку, если уже достигнут лимит по заявкам на данное событие");
+            }
+            if (event.getParticipantLimit() != 0 && event.getRequestModeration()) {
+                // если для события лимит заявок равен 0 или отключена пре-модерация заявок, то подтверждение заявок не требуется
+                requestRepository.updateUserRequestStatus(status.toString(), request.getId());
+                addResultRequest(result, request, status);
+                if (countRequest + 1L == event.getParticipantLimit()) {
+                    requestRepository.cancelStatusAllRequestPending(eventId);
+                    //если при подтверждении данной заявки, лимит заявок для события исчерпан, то все неподтверждённые заявки необходимо отклонить
+                }
+            }
+        }
+        return result;
     }
 
     @Override
+    @Transactional
     public EventRequestStatusUpdateResult requestUpdateStatus(Long userId, Long eventId,
                                                               EventRequestStatusUpdateRequest statusUpdateRequest) {
-        List<UserRequest> listRequest = requestRepository.findByIdIn(statusUpdateRequest.getRequestIds());
-/*
-{
-  "requestIds": [
-    1,
-    2,
-    3
-  ],
-  "status": "CONFIRMED" - подтвержден
-}
+        List<UserRequest> listRequest = requestRepository.findByIdInAndEventId(
+                statusUpdateRequest.getRequestIds(), eventId);
+        return verificationUserRequestAndUpdate(eventId, listRequest, statusUpdateRequest.getStatus());
+    }
 
-{"requestIds":[13],"status":"REJECTED"}
-
-{"requestIds":[14],"status":"CONFIRMED"}
-
-const target = pm.response.json()["rejectedRequests"][0];
-
-pm.test("Запрос на участие должен иметь статус PENDING / рассматрив при создании и статус REJECTED/ отклоненный
- после выполнения запроса", function () {
-    pm.expect(source.status).equal("PENDING");
-    pm.expect(target.status).equal("REJECTED");
-});
-
- */
-
-        List<ParticipationRequestDto> list = listRequest.stream()
-                .map(userRequestMapper::toPartRequestDto)
-                .toList();
-
-        EventRequestStatusUpdateResult updateResult = new EventRequestStatusUpdateResult(list, new ArrayList<>());
-
-        return updateResult;
+    private void addResultRequest(EventRequestStatusUpdateResult result, UserRequest request, RequestStatus status) {
+        ParticipationRequestDto addPart = userRequestMapper.toPartRequestDto(request);
+        addPart.setStatus(status);
+        if (status == RequestStatus.CONFIRMED) {
+            result.getConfirmedRequests().add(addPart);
+        }
+        if (status == RequestStatus.REJECTED) {
+            result.getRejectedRequests().add(addPart);
+        }
     }
 
     @Override
@@ -164,9 +176,141 @@ pm.test("Запрос на участие должен иметь статус P
         eventMapper.updEventForAdminEventDto(event, eventDto);
 
         event = eventRepository.save(event);
-        EventFullDto dto = eventMapper.toEventFullDto(event);
         return eventMapper.toEventFullDto(event);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<EventFullDto> searchEvents(EventSearchParam param) {
+        BooleanExpression predicate = event.isNotNull();
+        PageRequest page = PageRequest.of(param.getFrom() / param.getSize(), param.getSize());
+
+        if (param.isUsers()) {
+            predicate = predicate.and(event.initiator.id.in(param.getUsers()));
+        }
+        if (param.isStates()) {
+            predicate = predicate.and(event.state.in(param.getStates()));
+        }
+        if (param.isCategories()) {
+            predicate = predicate.and(event.category.id.in(param.getCategories()));
+        }
+
+        if (param.isStart() && param.isEnd()) {
+            predicate = predicate.and(event.createdOn.between(param.getRangeStart(), param.getRangeEnd()));
+        } else if (param.isStart()) {
+            predicate = predicate.and(event.createdOn.after(param.getRangeStart()));
+        } else if (param.isEnd()) {
+            predicate = predicate.and(event.createdOn.before(param.getRangeEnd()));
+        }
+
+        List<EventFullDto> events = eventRepository.findAll(predicate, page).toList().stream()
+                .map(eventMapper::toEventFullDto)
+                .toList();
+        for (EventFullDto fullDto : events) {
+            updDtoStatsViews(fullDto, param);
+        }
+
+        return events;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<EventShortDto> getEvents(EventParam param) {
+        BooleanExpression predicate = event.isNotNull();
+        PageRequest page = PageRequest.of(param.getFrom() / param.getSize(), param.getSize());
+
+        if (param.isText()) {
+            predicate = predicate.and(event.annotation.likeIgnoreCase(param.getText()));
+        }
+
+        if (param.isCategories()) {
+            predicate = predicate.and(event.category.id.in((Number) param.getCategories()));
+        }
+
+        if (param.isPaid()) {
+            predicate = predicate.and(event.paid.eq(param.getPaid()));
+        }
+
+        if (param.isStart() && param.isEnd()) {
+            predicate = predicate.and(event.createdOn.between(param.getRangeStart(), param.getRangeEnd()));
+        } else if (param.isStart()) {
+            predicate = predicate.and(event.createdOn.after(param.getRangeStart()));
+        } else if (param.isEnd()) {
+            predicate = predicate.and(event.createdOn.before(param.getRangeEnd()));
+        }
+
+//        if (param.getOnlyAvailable()) {
+//
+//        }
+
+
+        List<EventShortDto> eventsDto = eventRepository.findAll(predicate, page).toList().stream()
+                .map(eventMapper::toEventShortDto)
+                .toList();
+
+        for (EventShortDto fullDto : eventsDto) {
+            updDtoStatsViews(fullDto, param);
+        }
+        return eventsDto;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public EventFullDto getEventById(Long id) {
+        Event event = checkEventInDB(id);
+
+        if (event.getState() != EventState.PUBLISHED) {
+            throw new NotFoundException("Событие с id = " + id + " недоступно");
+        }
+        EventFullDto fullDto = eventMapper.toEventFullDto(event);
+        updDtoStatsViews(fullDto, new EventSearchParam(LocalDateTime.now().minusDays(3), LocalDateTime.now().plusDays(3)));
+        return fullDto;
+    }
+
+    private EventFullDto updDtoStatsViews(EventFullDto event, EventSearchParam param) {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        List<StatCountHitsResponseDto> stats = statsClient.getStats(
+                param.getRangeStart().format(dateTimeFormatter),
+                param.getRangeEnd().format(dateTimeFormatter),
+                List.of("events/" + event.getId()),
+                false);
+        long views = 0L;
+
+        for (StatCountHitsResponseDto stat : stats) {
+            views += stat.getHits();
+        }
+        long confirmedRequests = requestRepository.countByStatusAndEventId(RequestStatus.CONFIRMED, event.getId());
+
+        event.setViews(views);
+        event.setConfirmedRequests((int) confirmedRequests);
+        return event;
+    }
+
+    private EventShortDto updDtoStatsViews(EventShortDto event, EventParam param) {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        List<StatCountHitsResponseDto> stats = statsClient.getStats(
+                param.getRangeStart().format(dateTimeFormatter),
+                param.getRangeEnd().format(dateTimeFormatter),
+                List.of("events/" + event.getId()),
+                false);
+        long views = 0L;
+
+        for (StatCountHitsResponseDto stat : stats) {
+            views += stat.getHits();
+        }
+        long confirmedRequests = requestRepository.countByStatusAndEventId(RequestStatus.CONFIRMED, event.getId());
+
+        event.setViews(views);
+        event.setConfirmedRequests((int) confirmedRequests);
+        return event;
+    }
+
+
+//    private long getStats(EventSearchParam param){
+//
+//    }
 
     private void updEventForAdminEventDto(UpdateEventAdminRequest eventDto, Event event) {
         if (eventDto.getStateAction() != null) {
@@ -234,6 +378,7 @@ pm.test("Запрос на участие должен иметь статус P
         }
         if (event.getParticipantLimit() != 0) {
             long countRequest = requestRepository.countByStatusAndEventId(RequestStatus.CONFIRMED, event.getId());
+//            long countRequest = requestRepository.countByEventId(event.getId());
             if (countRequest >= event.getParticipantLimit()) {
                 throw new ConflictException("У события достигнут лимит запросов на участие, id - " + event.getId());
             }
@@ -251,10 +396,8 @@ pm.test("Запрос на участие должен иметь статус P
             switch (eventDto.getStateAction()) {
                 case CANCEL_REVIEW -> event.setState(EventState.CANCELED);
 
-                case SEND_TO_REVIEW -> {
-                    event.setPublishedOn(LocalDateTime.now());
-                    event.setState(EventState.PUBLISHED);
-                }
+                case SEND_TO_REVIEW -> event.setState(EventState.PENDING);
+
             }
         }
 

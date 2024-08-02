@@ -5,12 +5,12 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import ru.yandex.practicum.model.RequestStatus;
 
-import java.util.List;
+import java.util.Set;
 
 @Data
 public class EventRequestStatusUpdateRequest {
     @NotEmpty
-    List<Long> requestIds;
+    Set<Long> requestIds;
     @NotNull
     RequestStatus status;
 }

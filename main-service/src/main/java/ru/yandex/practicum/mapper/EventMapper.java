@@ -53,8 +53,8 @@ public abstract class EventMapper {
 
 //    Event toEvent(NewEventDto newEventDto);
 
-    @Mapping(target = "category", ignore = true)
-    public abstract Event toEvent(UpdateUserEventRequest updateUserEvent); // переделать
+//    @Mapping(target = "category", ignore = true)
+//    public abstract Event toEvent(UpdateUserEventRequest updateUserEvent); // переделать
 //
 //    @Mapping(target = "category", ignore = true)
 //    Event toEvent(UpdateEventAdminRequest updateEventAdmin);
