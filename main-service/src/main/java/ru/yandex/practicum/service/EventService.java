@@ -1,10 +1,12 @@
 package ru.yandex.practicum.service;
 
+import ru.yandex.practicum.dto.StatsSaveRequestDto;
 import ru.yandex.practicum.dto.event.*;
 import ru.yandex.practicum.dto.request.EventRequestStatusUpdateRequest;
 import ru.yandex.practicum.dto.request.EventRequestStatusUpdateResult;
 import ru.yandex.practicum.dto.request.ParticipationRequestDto;
-import ru.yandex.practicum.model.EventParam;
+import ru.yandex.practicum.related.EventParam;
+import ru.yandex.practicum.related.EventSearchParam;
 
 import java.util.List;
 
@@ -32,7 +34,7 @@ public interface EventService {
 
     List<EventFullDto> searchEvents(EventSearchParam param);
 
-    List<EventShortDto> getEvents(EventParam param);
+    List<EventShortDto> getEvents(EventParam param, StatsSaveRequestDto statsSaveRequestDto);
 
-    EventFullDto getEventById(Long id);
+    EventFullDto getEventById(Long id, StatsSaveRequestDto statsSaveRequestDto);
 }

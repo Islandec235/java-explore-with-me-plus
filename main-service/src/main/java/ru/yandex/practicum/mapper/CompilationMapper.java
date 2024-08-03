@@ -36,7 +36,7 @@ public abstract class CompilationMapper {
 
     @Named("setPinnedForNewDto")
     boolean setPinnedForNewDto(NewCompilationDto compilationDto) {
-        if ( compilationDto.getPinned() != null ) {
+        if (compilationDto.getPinned() != null) {
             return compilationDto.getPinned();
         }
         return false;

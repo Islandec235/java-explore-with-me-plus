@@ -86,7 +86,7 @@ public class CompilationServiceImpl implements CompilationService {
         if (patchDto.getTitle() != null && !patchDto.getTitle().equals(compilation.getTitle())) {
             compilation.setTitle(patchDto.getTitle());
         }
-        if (patchDto.getEvents() != null && patchDto.getEvents().isEmpty()) {
+        if (patchDto.getEvents() != null && !patchDto.getEvents().isEmpty()) {
             Set<Event> events = checkEventInDB(patchDto.getEvents());
             compilation.setEvents(events);
         }

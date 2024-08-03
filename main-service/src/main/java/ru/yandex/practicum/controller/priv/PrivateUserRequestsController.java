@@ -28,14 +28,14 @@ public class PrivateUserRequestsController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ParticipationRequestDto privateCreateRequestByUser(@PathVariable Long userId,
-                                                             @RequestParam Long eventId) {
+                                                              @RequestParam Long eventId) {
         log.info("Private post Request user {}, event {}", userId, eventId);
         return eventService.createRequestByUser(userId, eventId);
     }
 
     @PatchMapping("/{requestId}/cancel")
     public ParticipationRequestDto privateCancelRequestByUser(@PathVariable Long userId,
-                                                             @PathVariable Long requestId) {
+                                                              @PathVariable Long requestId) {
         log.info("Private patch Request cancel user {}, request {}", userId, requestId);
         return eventService.cancelRequestByUser(userId, requestId);
     }

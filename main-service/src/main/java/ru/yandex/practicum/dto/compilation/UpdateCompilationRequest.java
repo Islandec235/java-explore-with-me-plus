@@ -3,7 +3,6 @@ package ru.yandex.practicum.dto.compilation;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
-import java.util.List;
 import java.util.Set;
 
 @Data

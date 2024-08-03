@@ -7,9 +7,8 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.yandex.practicum.annotation.ConstraintFutureInTwoHours;
 import ru.yandex.practicum.model.Location;
-import ru.yandex.practicum.model.StateAction;
+import ru.yandex.practicum.related.StateAction;
 
 import java.time.LocalDateTime;
 

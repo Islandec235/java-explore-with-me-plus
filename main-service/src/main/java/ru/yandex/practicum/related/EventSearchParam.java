@@ -1,9 +1,8 @@
-package ru.yandex.practicum.dto.event;
+package ru.yandex.practicum.related;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.yandex.practicum.model.EventState;
 
 import java.time.LocalDateTime;
 import java.util.List;

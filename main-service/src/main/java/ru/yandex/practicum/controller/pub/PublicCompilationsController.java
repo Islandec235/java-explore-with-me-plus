@@ -1,6 +1,5 @@
 package ru.yandex.practicum.controller.pub;
 
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

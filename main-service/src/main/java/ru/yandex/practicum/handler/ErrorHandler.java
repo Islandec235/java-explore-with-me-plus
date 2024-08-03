@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -27,6 +28,20 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleIllegalArgumentException(final IllegalArgumentException e) {
+        log.error("Error 400 {} \n {}", e.getMessage());
+        return handleResponseCreate(e, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleMissingServletRequestParameterException(final MissingServletRequestParameterException e) {
+        log.error("Error 400 {} \n {}", e.getMessage());
+        return handleResponseCreate(e, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiError handleNotFound(final NotFoundException e) {
         log.error("Error 404 {}", e.getMessage());
@@ -41,17 +56,18 @@ public class ErrorHandler {
         return handleResponseCreate(e, HttpStatus.CONFLICT);
     }
 
-//    @ExceptionHandler
-//    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-//    public ApiError handleThrowable(final Throwable e) {
-//        log.error("Error Throwable 500 {}", e.getMessage());
-//        return handleResponseCreate(e, HttpStatus.INTERNAL_SERVER_ERROR);
-//    }
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ApiError handleThrowable(final Throwable e) {
+        log.error("Error Throwable 500 {}", e.getMessage());
+        return handleResponseCreate(e, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
     private ApiError handleResponseCreate(Throwable e, HttpStatus status) {
         String classInit = Arrays.stream(e.getStackTrace()).findAny().get().toString();
-        String localMessage = e.getLocalizedMessage()  + " \n Class: " + classInit;
+        String localMessage = e.getLocalizedMessage() + " \n Class: " + classInit;
 
+        e.printStackTrace();
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
         e.printStackTrace(pw);

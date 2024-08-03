@@ -3,7 +3,7 @@ package ru.yandex.practicum.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import ru.yandex.practicum.model.RequestStatus;
+import ru.yandex.practicum.related.RequestStatus;
 import ru.yandex.practicum.model.UserRequest;
 
 import java.util.List;
@@ -17,8 +17,9 @@ public interface UserRequestRepository extends JpaRepository<UserRequest, Long> 
 
     List<UserRequest> findAllByRequesterIdAndEventId(Long userId, Long eventId);
 
-    List<UserRequest> findByIdInAndEventId(Set<Long> ids, Long eventId);
+    List<UserRequest> findAllByEventId(Long eventId);
 
+    List<UserRequest> findByIdInAndEventId(Set<Long> ids, Long eventId);
 
 
     @Modifying

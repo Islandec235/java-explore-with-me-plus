@@ -2,7 +2,7 @@ package ru.yandex.practicum.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
-import ru.yandex.practicum.model.RequestStatus;
+import ru.yandex.practicum.related.RequestStatus;
 
 import java.time.LocalDateTime;
 

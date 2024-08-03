@@ -8,9 +8,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.dto.event.EventFullDto;
-import ru.yandex.practicum.dto.event.EventSearchParam;
+import ru.yandex.practicum.related.EventSearchParam;
 import ru.yandex.practicum.dto.event.UpdateEventAdminRequest;
-import ru.yandex.practicum.model.EventState;
+import ru.yandex.practicum.related.EventState;
 import ru.yandex.practicum.service.EventService;
 
 import java.time.LocalDateTime;

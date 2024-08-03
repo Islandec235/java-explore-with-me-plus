@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.client.StatsClient;
 import ru.yandex.practicum.dto.StatCountHitsResponseDto;
+import ru.yandex.practicum.dto.StatsSaveRequestDto;
 import ru.yandex.practicum.dto.event.*;
 import ru.yandex.practicum.dto.request.EventRequestStatusUpdateRequest;
 import ru.yandex.practicum.dto.request.EventRequestStatusUpdateResult;
@@ -16,6 +17,10 @@ import ru.yandex.practicum.exception.NotFoundException;
 import ru.yandex.practicum.mapper.EventMapper;
 import ru.yandex.practicum.mapper.UserRequestMapper;
 import ru.yandex.practicum.model.*;
+import ru.yandex.practicum.related.EventParam;
+import ru.yandex.practicum.related.EventSearchParam;
+import ru.yandex.practicum.related.EventState;
+import ru.yandex.practicum.related.RequestStatus;
 import ru.yandex.practicum.repository.*;
 import ru.yandex.practicum.service.EventService;
 
@@ -117,7 +122,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<ParticipationRequestDto> getRequestForUserAndEvent(Long userId, Long eventId) {
-        List<UserRequest> userRequest = requestRepository.findAllByRequesterIdAndEventId(userId, eventId);
+        List<UserRequest> userRequest = requestRepository.findAllByEventId(eventId);
         return userRequest.stream()
                 .map(userRequestMapper::toPartRequestDto)
                 .collect(Collectors.toList());
@@ -136,12 +141,10 @@ public class EventServiceImpl implements EventService {
                 throw new ConflictException("Нельзя подтвердить заявку, если уже достигнут лимит по заявкам на данное событие");
             }
             if (event.getParticipantLimit() != 0 && event.getRequestModeration()) {
-                // если для события лимит заявок равен 0 или отключена пре-модерация заявок, то подтверждение заявок не требуется
                 requestRepository.updateUserRequestStatus(status.toString(), request.getId());
                 addResultRequest(result, request, status);
                 if (countRequest + 1L == event.getParticipantLimit()) {
                     requestRepository.cancelStatusAllRequestPending(eventId);
-                    //если при подтверждении данной заявки, лимит заявок для события исчерпан, то все неподтверждённые заявки необходимо отклонить
                 }
             }
         }
@@ -203,6 +206,13 @@ public class EventServiceImpl implements EventService {
             predicate = predicate.and(event.createdOn.before(param.getRangeEnd()));
         }
 
+        if (!param.isStart()) {
+            param.setRangeStart(LocalDateTime.now().minusDays(5));
+        }
+        if (!param.isEnd()) {
+            param.setRangeEnd(LocalDateTime.now().plusDays(5));
+        }
+
         List<EventFullDto> events = eventRepository.findAll(predicate, page).toList().stream()
                 .map(eventMapper::toEventFullDto)
                 .toList();
@@ -215,16 +225,17 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<EventShortDto> getEvents(EventParam param) {
+    public List<EventShortDto> getEvents(EventParam param, StatsSaveRequestDto statsSaveRequestDto) {
         BooleanExpression predicate = event.isNotNull();
         PageRequest page = PageRequest.of(param.getFrom() / param.getSize(), param.getSize());
 
         if (param.isText()) {
+            checkText(param.getText());
             predicate = predicate.and(event.annotation.likeIgnoreCase(param.getText()));
         }
 
         if (param.isCategories()) {
-            predicate = predicate.and(event.category.id.in((Number) param.getCategories()));
+            predicate = predicate.and(event.category.id.in(param.getCategories()));
         }
 
         if (param.isPaid()) {
@@ -239,11 +250,14 @@ public class EventServiceImpl implements EventService {
             predicate = predicate.and(event.createdOn.before(param.getRangeEnd()));
         }
 
-//        if (param.getOnlyAvailable()) {
-//
-//        }
+        if (!param.isStart()) {
+            param.setRangeStart(LocalDateTime.now().minusDays(5));
+        }
+        if (!param.isEnd()) {
+            param.setRangeEnd(LocalDateTime.now().plusDays(5));
+        }
 
-
+        saveStatGetEvent(statsSaveRequestDto);
         List<EventShortDto> eventsDto = eventRepository.findAll(predicate, page).toList().stream()
                 .map(eventMapper::toEventShortDto)
                 .toList();
@@ -255,16 +269,26 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public EventFullDto getEventById(Long id) {
+    public EventFullDto getEventById(Long id, StatsSaveRequestDto statsSaveRequestDto) {
         Event event = checkEventInDB(id);
-
         if (event.getState() != EventState.PUBLISHED) {
             throw new NotFoundException("Событие с id = " + id + " недоступно");
         }
+
+        saveStatGetEvent(statsSaveRequestDto);
         EventFullDto fullDto = eventMapper.toEventFullDto(event);
         updDtoStatsViews(fullDto, new EventSearchParam(LocalDateTime.now().minusDays(3), LocalDateTime.now().plusDays(3)));
         return fullDto;
+    }
+
+    private void checkText(String str) {
+        if (str.equals("0")) {
+            throw new IllegalArgumentException("Указать подробное описание события");
+        }
+    }
+
+    private void saveStatGetEvent(StatsSaveRequestDto saveDto) {
+        statsClient.saveRestClientNewStat(saveDto);
     }
 
     private EventFullDto updDtoStatsViews(EventFullDto event, EventSearchParam param) {
@@ -273,8 +297,8 @@ public class EventServiceImpl implements EventService {
         List<StatCountHitsResponseDto> stats = statsClient.getStats(
                 param.getRangeStart().format(dateTimeFormatter),
                 param.getRangeEnd().format(dateTimeFormatter),
-                List.of("events/" + event.getId()),
-                false);
+                List.of("/events/" + event.getId()),
+                true);
         long views = 0L;
 
         for (StatCountHitsResponseDto stat : stats) {
@@ -306,11 +330,6 @@ public class EventServiceImpl implements EventService {
         event.setConfirmedRequests((int) confirmedRequests);
         return event;
     }
-
-
-//    private long getStats(EventSearchParam param){
-//
-//    }
 
     private void updEventForAdminEventDto(UpdateEventAdminRequest eventDto, Event event) {
         if (eventDto.getStateAction() != null) {
@@ -378,7 +397,6 @@ public class EventServiceImpl implements EventService {
         }
         if (event.getParticipantLimit() != 0) {
             long countRequest = requestRepository.countByStatusAndEventId(RequestStatus.CONFIRMED, event.getId());
-//            long countRequest = requestRepository.countByEventId(event.getId());
             if (countRequest >= event.getParticipantLimit()) {
                 throw new ConflictException("У события достигнут лимит запросов на участие, id - " + event.getId());
             }

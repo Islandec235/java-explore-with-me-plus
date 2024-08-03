@@ -4,18 +4,16 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.client.StatsClient;
 import ru.yandex.practicum.dto.StatsSaveRequestDto;
 import ru.yandex.practicum.dto.event.EventFullDto;
 import ru.yandex.practicum.dto.event.EventShortDto;
-import ru.yandex.practicum.model.EventParam;
+import ru.yandex.practicum.related.EventParam;
 import ru.yandex.practicum.service.EventService;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -24,10 +22,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/events")
 public class PublicEventController {
-    private final StatsClient statsClient;
-    private final EventService service;
 
-    private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private final EventService service;
 
     @GetMapping
     public List<EventShortDto> getEvents(
@@ -41,24 +37,20 @@ public class PublicEventController {
             @RequestParam(required = false, defaultValue = "10") Integer size,
             HttpServletRequest request) {
         log.info("Получение событий");
-        statsClient.saveNewStat(new StatsSaveRequestDto(
-                "emv-main-service",
-                request.getServletPath(),
-                request.getRemoteAddr(),
-                LocalDateTime.now()));
+        StatsSaveRequestDto statsSaveRequestDto = new StatsSaveRequestDto("emv-main-service",
+                request.getServletPath(), request.getRemoteAddr(),
+                LocalDateTime.now().withNano(0));
         EventParam param = new EventParam(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, from, size);
-        return service.getEvents(param);
+        return service.getEvents(param, statsSaveRequestDto);
     }
 
-
     @GetMapping("/{id}")
+    @Transactional
     public EventFullDto getEventById(@PathVariable Long id, HttpServletRequest request) {
         log.info("Получение события id = {}", id);
-        statsClient.saveNewStat(new StatsSaveRequestDto(
-                "emv-main-service",
-                request.getServletPath(),
-                request.getRemoteAddr(),
-                LocalDateTime.now())); //.format(dateTimeFormatter)
-        return service.getEventById(id);
+        StatsSaveRequestDto statsSaveRequestDto = new StatsSaveRequestDto("emv-main-service",
+                request.getServletPath(), request.getRemoteAddr(),
+                LocalDateTime.now().withNano(0));
+        return service.getEventById(id, statsSaveRequestDto);
     }
 }

@@ -3,7 +3,11 @@ package ru.yandex.practicum.mapper;
 import org.mapstruct.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.yandex.practicum.dto.event.*;
-import ru.yandex.practicum.model.*;
+import ru.yandex.practicum.model.Category;
+import ru.yandex.practicum.model.Event;
+import ru.yandex.practicum.model.Location;
+import ru.yandex.practicum.model.User;
+import ru.yandex.practicum.related.EventState;
 
 import java.time.LocalDateTime;
 
@@ -46,18 +50,6 @@ public abstract class EventMapper {
     @Mapping(target = "state", ignore = true)
     public abstract void updEventForAdminEventDto(@MappingTarget Event event, UpdateEventAdminRequest updateDto);
 
-
-    /*@BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
-            nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
-    void updateItemFromItemDto(ItemDto itemDto, @MappingTarget Item item);*/
-
-//    Event toEvent(NewEventDto newEventDto);
-
-//    @Mapping(target = "category", ignore = true)
-//    public abstract Event toEvent(UpdateUserEventRequest updateUserEvent); // переделать
-//
-//    @Mapping(target = "category", ignore = true)
-//    Event toEvent(UpdateEventAdminRequest updateEventAdmin);
 
     @Named("setCreatedOnNow")
     LocalDateTime setCreatedOnNow() {

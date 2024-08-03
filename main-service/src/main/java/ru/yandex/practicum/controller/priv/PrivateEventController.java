@@ -69,17 +69,17 @@ public class PrivateEventController {
     }
 
     @PatchMapping("/{eventId}/requests")
-    public EventRequestStatusUpdateResult requestUpdateStatus (@PathVariable Long userId,
-                                                               @PathVariable Long eventId,
-            @RequestBody @Valid EventRequestStatusUpdateRequest statusUpdateRequest) {
+    public EventRequestStatusUpdateResult requestUpdateStatus(@PathVariable Long userId,
+                                                              @PathVariable Long eventId,
+                                                              @RequestBody @Valid EventRequestStatusUpdateRequest statusUpdateRequest) {
         log.info("Patch request change update {} ", statusUpdateRequest);
         return eventService.requestUpdateStatus(userId, eventId, statusUpdateRequest);
     }
 
     @PatchMapping("/{eventId}/requests/")
-    public EventRequestStatusUpdateResult requestUpdateStatus_Patch (@PathVariable Long userId,
-                                                               @PathVariable Long eventId,
-                                                               @RequestBody @Valid EventRequestStatusUpdateRequest statusUpdateRequest) {
+    public EventRequestStatusUpdateResult requestUpdateStatus_Patch(@PathVariable Long userId,
+                                                                    @PathVariable Long eventId,
+                                                                    @RequestBody @Valid EventRequestStatusUpdateRequest statusUpdateRequest) {
         log.info("Patch request change update {} ", statusUpdateRequest);
         return eventService.requestUpdateStatus(userId, eventId, statusUpdateRequest);
     }

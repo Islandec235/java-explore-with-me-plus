@@ -5,9 +5,9 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import ru.yandex.practicum.dto.request.ParticipationRequestDto;
 import ru.yandex.practicum.model.Event;
-import ru.yandex.practicum.model.RequestStatus;
 import ru.yandex.practicum.model.User;
 import ru.yandex.practicum.model.UserRequest;
+import ru.yandex.practicum.related.RequestStatus;
 
 import java.time.LocalDateTime;
 
@@ -34,7 +34,7 @@ public abstract class UserRequestMapper {
 
     @Named("setStatus")
     RequestStatus setStatus(Event event) {
-        if(!event.getRequestModeration() || event.getParticipantLimit() == 0){
+        if (!event.getRequestModeration() || event.getParticipantLimit() == 0) {
             return RequestStatus.CONFIRMED;
         }
         return RequestStatus.PENDING;
