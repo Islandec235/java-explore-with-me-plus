@@ -2,13 +2,11 @@ package ru.yandex.practicum.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
+import org.springframework.web.client.RestClient;
 import ru.yandex.practicum.dto.StatCountHitsResponseDto;
-import ru.yandex.practicum.dto.StatsResponseHitDto;
 import ru.yandex.practicum.dto.StatsSaveRequestDto;
 
 import java.util.Arrays;
@@ -21,11 +19,11 @@ import static ru.yandex.practicum.related.Constants.CONTROLLER_STATS_PATH;
 @AllArgsConstructor
 public class StatsClientImpl implements StatsClient {
 
-    private final WebClient webClient;
+    private final RestClient restClient;
 
     @Override
     public List<StatCountHitsResponseDto> getStats(final String startTime, final String endTime, final List<String> uris, final Boolean unique) {
-        Object[] listObj = webClient
+        Object[] listObj = restClient
                 .get()
                 .uri(uriBuilder -> uriBuilder.path(CONTROLLER_STATS_PATH)
                         .queryParam("start", startTime)
@@ -34,7 +32,7 @@ public class StatsClientImpl implements StatsClient {
                         .queryParam("unique", unique)
                         .build())
                 .retrieve()
-                .bodyToMono(Object[].class).block();
+                .body(Object[].class);
 
         ObjectMapper mapper = new ObjectMapper();
         return Arrays.stream(listObj)
@@ -43,13 +41,12 @@ public class StatsClientImpl implements StatsClient {
     }
 
     @Override
-    public Mono<StatsResponseHitDto> saveNewStat(final StatsSaveRequestDto request) {
-        return webClient
-                .post()
+    public ResponseEntity<Void> saveRestClientNewStat(final StatsSaveRequestDto request) {
+        return restClient.post()
                 .uri(CONTROLLER_HIT_PATH)
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .body(Mono.just(request), StatsResponseHitDto.class)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(request)
                 .retrieve()
-                .bodyToMono(StatsResponseHitDto.class);
+                .toBodilessEntity();
     }
 }

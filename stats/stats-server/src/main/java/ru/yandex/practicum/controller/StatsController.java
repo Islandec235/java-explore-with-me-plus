@@ -4,11 +4,8 @@ package ru.yandex.practicum.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.dto.StatCountHitsResponseDto;
 import ru.yandex.practicum.dto.StatsResponseHitDto;
 import ru.yandex.practicum.dto.StatsSaveRequestDto;
@@ -28,6 +25,7 @@ public class StatsController {
     private final StatsService service;
 
     @PostMapping(CONTROLLER_HIT_PATH)
+    @ResponseStatus(HttpStatus.CREATED)
     public StatsResponseHitDto saveInfo(@RequestBody StatsSaveRequestDto saveRequestDto) {
         log.info("Запрос на сохранение {}", saveRequestDto);
         return service.saveInfo(saveRequestDto);

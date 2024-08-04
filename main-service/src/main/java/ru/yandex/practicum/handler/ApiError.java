@@ -1,4 +1,4 @@
-package ru.yandex.practicum.error;
+package ru.yandex.practicum.handler;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -8,16 +8,18 @@ import java.time.ZonedDateTime;
 
 @Setter
 @Getter
-public class ErrorResponse {
+public class ApiError {
     HttpStatus status;
+    String reason;
     String message;
     String stackTrace;
-    ZonedDateTime dateTime;
+    ZonedDateTime timestamp;
 
-    public ErrorResponse(HttpStatus status, String message, String stackTrace) {
+    public ApiError(HttpStatus status, String reason, String message, String stackTrace) {
         this.status = status;
+        this.reason = reason;
         this.message = message;
         this.stackTrace = stackTrace;
-        dateTime = ZonedDateTime.now();
+        timestamp = ZonedDateTime.now();
     }
 }
