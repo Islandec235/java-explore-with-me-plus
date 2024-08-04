@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.dto.*;
+import ru.yandex.practicum.error.CustomValueException;
 import ru.yandex.practicum.mapper.StatsMapper;
 import ru.yandex.practicum.model.Stat;
 import ru.yandex.practicum.repository.StatsRepository;
@@ -34,6 +35,7 @@ public class StatsServiceImpl implements StatsService {
     @Transactional(readOnly = true)
     @Override
     public List<StatCountHitsResponseDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
+        checkTimeStartAndEnd(start, end);
         List<StatCountHitsDto> listStats;
 
         if (unique) {
@@ -47,5 +49,11 @@ public class StatsServiceImpl implements StatsService {
         return listStats.stream()
                 .map(statsMapper::toCountHitsResponseDto)
                 .collect(Collectors.toList());
+    }
+
+    private void checkTimeStartAndEnd(LocalDateTime start, LocalDateTime end) {
+        if (end.isBefore(start)) {
+            throw new CustomValueException("Дата start " + start + "не может быть позже end " + end);
+        }
     }
 }

@@ -8,8 +8,8 @@ services:
       - "5669:5432"
     environment:
       - POSTGRES_DB=stat-service-db
-      - POSTGRES_USER=test
-      - POSTGRES_PASSWORD=test
+      - POSTGRES_USER=statsUserDB
+      - POSTGRES_PASSWORD=statsDB
 
     healthcheck:
       test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
@@ -28,8 +28,8 @@ services:
       - VALUE_PROFILE=dev
       - SERVER_PORT=9090
       - DB_NAME=stat-service-db
-      - POSTGRES_USER=test
-      - POSTGRES_PASSWORD=test
+      - POSTGRES_USER=statsUserDB
+      - POSTGRES_PASSWORD=statsDB
       - DB_HOST=stats-db
       - DB_PORT=5432
     #      - TZ=Europe/Samara
@@ -42,23 +42,29 @@ services:
       - "8080:8080"
     depends_on:
       - stats-server
+      - ewm-db
     environment:
-#      - EVM_SERVER_URL=http://ewm-db:9090
+      - VALUE_PROFILE=dev
+      - SERVER_PORT=8080
+      - DB_NAME=main-ewm-db
+      - DB_HOST=ewm-db
+      - DB_PORT=5432
       - STATS_SERVER_URL=http://stats-server:9090
+      - POSTGRES_USER=mainUserDB
+      - POSTGRES_PASSWORD=mainDB
 
-#  ewm-db:
-#    image: postgres:16.1
-#    container_name: ewm-db
-#    ports:
-#      - "5669:5432"
-#    environment:
-#      - POSTGRES_DB=ewm-db
-#      - POSTGRES_USER=test
-#      - POSTGRES_PASSWORD=test
-#
-#    healthcheck:
-#      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
-#      timeout: 5s
-#      interval: 5s
-#      retries: 10
+  ewm-db:
+    image: postgres:16.1
+    container_name: ewm-db
+    ports:
+      - "5670:5432"
+    environment:
+      - POSTGRES_DB=main-ewm-db
+      - POSTGRES_USER=mainUserDB
+      - POSTGRES_PASSWORD=mainDB
 
+    healthcheck:
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
+      timeout: 5s
+      interval: 5s
+      retries: 10
