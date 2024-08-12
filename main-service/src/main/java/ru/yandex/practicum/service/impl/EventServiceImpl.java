@@ -3,6 +3,7 @@ package ru.yandex.practicum.service.impl;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.client.StatsClient;
@@ -269,6 +270,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public EventFullDto getEventById(Long id, StatsSaveRequestDto statsSaveRequestDto) {
         Event event = checkEventInDB(id);
         if (event.getState() != EventState.PUBLISHED) {
@@ -279,6 +281,23 @@ public class EventServiceImpl implements EventService {
         EventFullDto fullDto = eventMapper.toEventFullDto(event);
         updDtoStatsViews(fullDto, new EventSearchParam(LocalDateTime.now().minusDays(3), LocalDateTime.now().plusDays(3)));
         return fullDto;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<EventShortDto> getFollowEvent(Long userId) {
+        User user = checkUserInDataBase(userId);
+        List<EventShortDto> events = new ArrayList<>();
+
+        for (User following : user.getFollowing()) {
+            events.addAll(
+                    eventRepository.findByInitiatorIdAndStateIs(following.getId(), EventState.PUBLISHED)
+                            .stream()
+                            .map(eventMapper::toEventShortDto)
+                            .toList());
+        }
+
+        return events;
     }
 
     private void checkText(String str) {
