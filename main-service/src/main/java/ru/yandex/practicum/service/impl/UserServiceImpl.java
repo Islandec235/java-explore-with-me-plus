@@ -56,6 +56,11 @@ public class UserServiceImpl implements UserService {
         User follower = checkUserInDataBase(followerId);
         User followed = checkUserInDataBase(followedId);
         checkTwoUser(follower, followed);
+
+        if (followed.getFollowers().contains(follower)) {
+            throw new ConflictException("Нельзя повторно подписаться на пользователя");
+        }
+
         follower.follow(followed);
         repository.saveAll(List.of(follower, followed));
 
@@ -67,17 +72,24 @@ public class UserServiceImpl implements UserService {
         User follower = checkUserInDataBase(followerId);
         User followed = checkUserInDataBase(followedId);
         checkTwoUser(follower, followed);
+
+        if (!followed.getFollowers().contains(follower)) {
+            throw new ConflictException("Нельзя отписаться если не подписан на пользователя");
+        }
+
         follower.unfollow(followed);
         repository.saveAll(List.of(follower, followed));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<UserDto> getFollowers(Long userId) {
         User user = checkUserInDataBase(userId);
         return toListUserDto(user.getFollowers());
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<UserDto> getFollowing(Long userId) {
         User user = checkUserInDataBase(userId);
         return toListUserDto(user.getFollowing());
