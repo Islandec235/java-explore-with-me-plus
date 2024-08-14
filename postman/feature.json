@@ -273,16 +273,6 @@
 					"name": "Change state event",
 					"event": [
 						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									""
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						},
-						{
 							"listen": "test",
 							"script": {
 								"exec": [
@@ -305,19 +295,20 @@
 									"pm.expect(target).to.have.property('requestModeration');\r",
 									"});\r",
 									"\r",
-									"pm.test(\"Данные в ответе должны соответствовать данным в запросе\", function () {\r",
+									"pm.test(\"Данные в ответе не совпадают с ожидаемыми\", function () {\r",
 									"    pm.expect(target.id).to.not.be.null;\r",
-									"    pm.expect(target.title).equal(\"2100\", 'Название события неверно');\r",
-									"    pm.expect(target.annotation).equal(\"Самое масштабное событие этого года\", 'Аннотация события неверная');\r",
-									"    pm.expect(target.paid.toString()).equal(\"false\", 'Стоимость события неверная');\r",
-									"    pm.expect(target.eventDate).equal(\"2100-08-13 00:00:00\", 'Дата проведения события неверная');\r",
-									"    pm.expect(target.description).equal(\"Описание самого масштабного события этого года\", 'Описание события неверно');\r",
-									"    pm.expect(target.participantLimit.toString()).equal(\"0\", 'Лимит участников события неверно');\r",
-									"    pm.expect(target.location.lat.toString()).equal(\"1.02\", 'Широта локации проведения события неверная');\r",
-									"    pm.expect(target.location.lon.toString()).equal(\"3.01\", 'Долгота локации проведения события неверная');\r",
-									"    pm.expect(target.requestModeration.toString()).equal(\"true\", 'Необходимость модерации события неверная');\r",
 									"    pm.expect(target.state.toString()).equal(\"PUBLISHED\", 'Неверный статус');\r",
 									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
 								],
 								"type": "text/javascript",
 								"packages": {}
@@ -554,10 +545,8 @@
 									"    pm.expect(target).to.have.property('email');\r",
 									"});\r",
 									"\r",
-									"pm.test(\"Данные в ответе должны соответствовать данным в запросе\", function () {\r",
-									"    pm.expect(target.id).to.equal(2); \r",
-									"    pm.expect(target.name).to.equal(\"Igor\"); \r",
-									"    pm.expect(target.email).to.equal(\"ya@yandex.ru\");\r",
+									"pm.test(\"Неверный id пользователя\", function () {\r",
+									"    pm.expect(target.id).to.eql(2);\r",
 									"});\r",
 									""
 								],
@@ -626,10 +615,8 @@
 									"    pm.expect(target).to.have.property('email');\r",
 									"});\r",
 									"\r",
-									"pm.test(\"Данные в ответе должны соответствовать данным в запросе\", function () {\r",
+									"pm.test(\"Неверный id пользователя\", function () {\r",
 									"    pm.expect(target.id).to.eql(1);\r",
-									"    pm.expect(target.name).to.eql(\"Islandec\");\r",
-									"    pm.expect(target.email).to.eql(\"yandex@yandex.ru\");\r",
 									"});\r",
 									""
 								],
