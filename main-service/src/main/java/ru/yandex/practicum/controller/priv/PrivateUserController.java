@@ -3,7 +3,6 @@ package ru.yandex.practicum.controller.priv;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,7 +15,6 @@ import ru.yandex.practicum.service.UserService;
 import java.util.List;
 
 @Slf4j
-@Validated
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/users/{userId}")
@@ -29,6 +27,7 @@ public class PrivateUserController {
             @PathVariable Long userId,
             @PathVariable Long followedId
     ) {
+        log.info("Запрос подписки userId = {} на followedId = {}", userId, followedId);
         userService.subscribe(userId, followedId);
     }
 
@@ -38,16 +37,19 @@ public class PrivateUserController {
             @PathVariable Long userId,
             @PathVariable Long followedId
     ) {
+        log.info("Запрос отписки userId = {} на followedId = {}", userId, followedId);
         userService.unsubscribe(userId, followedId);
     }
 
     @GetMapping("/followers")
     public List<UserDto> getFollowers(@PathVariable Long userId) {
+        log.info("Запрос на получение подписчиков user = {}", userId);
         return userService.getFollowers(userId);
     }
 
     @GetMapping("/following")
     public List<UserDto> getFollowing(@PathVariable Long userId) {
+        log.info("Запрос на получение подписок user = {}", userId);
         return userService.getFollowing(userId);
     }
 }

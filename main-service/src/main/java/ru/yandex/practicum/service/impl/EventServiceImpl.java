@@ -298,17 +298,14 @@ public class EventServiceImpl implements EventService {
     @Transactional(readOnly = true)
     public List<EventShortDto> getFollowEvent(Long userId) {
         User user = checkUserInDataBase(userId);
-        List<EventShortDto> events = new ArrayList<>();
-
-        for (User following : user.getFollowing()) {
-            events.addAll(
-                    eventRepository.findByInitiatorIdAndStateIs(following.getId(), EventState.PUBLISHED)
-                            .stream()
-                            .map(eventMapper::toEventShortDto)
-                            .toList());
-        }
-
-        return events;
+        List<Long> followingIds = user.getFollowing()
+                .stream()
+                .map(User::getId)
+                .toList();
+        return eventRepository.findByStateIsAndInitiatorIdIn(EventState.PUBLISHED, followingIds)
+                .stream()
+                .map(eventMapper::toEventShortDto)
+                .toList();
     }
 
     private void checkText(String str) {
