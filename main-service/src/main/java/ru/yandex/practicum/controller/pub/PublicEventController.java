@@ -1,5 +1,7 @@
 package ru.yandex.practicum.controller.pub;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,11 +23,13 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/events")
+@Tag(name = "Public: События", description = "Публичный API для работы с событиями")
 public class PublicEventController {
 
     private final EventService service;
 
     @GetMapping
+    @Operation(summary = "Получение событий с возможностью фильтрации")
     public List<EventShortDto> getEvents(
             @RequestParam(required = false) String text,
             @RequestParam(required = false) List<Long> categories,
@@ -46,6 +50,7 @@ public class PublicEventController {
 
     @GetMapping("/{id}")
     @Transactional
+    @Operation(summary = "Получение подробной информации о событии по идентификатору")
     public EventFullDto getEventById(@PathVariable Long id, HttpServletRequest request) {
         log.info("Получение события id = {}", id);
         StatsSaveRequestDto statsSaveRequestDto = new StatsSaveRequestDto("emv-main-service",

@@ -1,5 +1,7 @@
 package ru.yandex.practicum.controller.adm;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,12 +17,14 @@ import ru.yandex.practicum.service.CategoryService;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/admin/categories")
+@Tag(name = "Admin: Категории", description = "API для работы с категориями")
 public class AdminCategoryController {
 
     private final CategoryService service;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Создание категории", description = "Добавление новой категории, если её имя уникальное")
     public CategoryDto createCategory(@RequestBody @Valid NewCategoryDto categoryDto) {
         log.info("Создание категории {}", categoryDto);
         return service.create(categoryDto);
@@ -28,12 +32,14 @@ public class AdminCategoryController {
 
     @DeleteMapping("/{catId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Удаление категории", description = "Удаляет категорию, если она не связана с событиями")
     public void deleteCategory(@PathVariable Long catId) {
         log.info("Удаление категории categoryId = {}", catId);
         service.delete(catId);
     }
 
     @PatchMapping("/{catId}")
+    @Operation(summary = "Изменение категории", description = "Изменяет категорию, если её имя уникальное")
     public CategoryDto changeCategory(
             @PathVariable Long catId,
             @RequestBody @Valid NewCategoryDto categoryDto) {
