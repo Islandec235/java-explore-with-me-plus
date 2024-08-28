@@ -37,4 +37,6 @@ public interface EventService {
     List<EventShortDto> getEvents(EventParam param, StatsSaveRequestDto statsSaveRequestDto);
 
     EventFullDto getEventById(Long id, StatsSaveRequestDto statsSaveRequestDto);
+
+    List<EventShortDto> getFollowEvent(Long userId);
 }

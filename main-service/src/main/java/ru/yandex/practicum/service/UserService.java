@@ -12,4 +12,11 @@ public interface UserService {
 
     void delete(Long id);
 
+    void subscribe(Long followerId, Long followedId);
+
+    void unsubscribe(Long followerId, Long followedId);
+
+    List<UserDto> getFollowers(Long userId);
+
+    List<UserDto> getFollowing(Long userId);
 }

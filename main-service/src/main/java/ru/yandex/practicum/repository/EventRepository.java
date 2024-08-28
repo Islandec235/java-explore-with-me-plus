@@ -4,6 +4,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import ru.yandex.practicum.model.Event;
+import ru.yandex.practicum.related.EventState;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,4 +18,6 @@ public interface EventRepository extends JpaRepository<Event, Long>, QuerydslPre
     List<Event> findByCategoryId(Integer catId);
 
     Set<Event> findByIdIn(Set<Long> ids);
+
+    List<Event> findByStateIsAndInitiatorIdIn(EventState state, List<Long> initiatorIds);
 }

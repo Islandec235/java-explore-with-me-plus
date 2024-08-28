@@ -83,4 +83,9 @@ public class PrivateEventController {
         log.info("Patch request change update {} ", statusUpdateRequest);
         return eventService.requestUpdateStatus(userId, eventId, statusUpdateRequest);
     }
+
+    @GetMapping("/follow")
+    public List<EventShortDto> getFollowEvents(@PathVariable Long userId) {
+        return eventService.getFollowEvent(userId);
+    }
 }

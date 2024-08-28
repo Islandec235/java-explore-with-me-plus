@@ -8,7 +8,11 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.client.StatsClient;
 import ru.yandex.practicum.dto.StatCountHitsResponseDto;
 import ru.yandex.practicum.dto.StatsSaveRequestDto;
-import ru.yandex.practicum.dto.event.*;
+import ru.yandex.practicum.dto.event.EventFullDto;
+import ru.yandex.practicum.dto.event.EventShortDto;
+import ru.yandex.practicum.dto.event.NewEventDto;
+import ru.yandex.practicum.dto.event.UpdateEventAdminRequest;
+import ru.yandex.practicum.dto.event.UpdateUserEventRequest;
 import ru.yandex.practicum.dto.request.EventRequestStatusUpdateRequest;
 import ru.yandex.practicum.dto.request.EventRequestStatusUpdateResult;
 import ru.yandex.practicum.dto.request.ParticipationRequestDto;
@@ -16,12 +20,20 @@ import ru.yandex.practicum.exception.ConflictException;
 import ru.yandex.practicum.exception.NotFoundException;
 import ru.yandex.practicum.mapper.EventMapper;
 import ru.yandex.practicum.mapper.UserRequestMapper;
-import ru.yandex.practicum.model.*;
+import ru.yandex.practicum.model.Category;
+import ru.yandex.practicum.model.Event;
+import ru.yandex.practicum.model.Location;
+import ru.yandex.practicum.model.User;
+import ru.yandex.practicum.model.UserRequest;
 import ru.yandex.practicum.related.EventParam;
 import ru.yandex.practicum.related.EventSearchParam;
 import ru.yandex.practicum.related.EventState;
 import ru.yandex.practicum.related.RequestStatus;
-import ru.yandex.practicum.repository.*;
+import ru.yandex.practicum.repository.CategoryRepository;
+import ru.yandex.practicum.repository.EventRepository;
+import ru.yandex.practicum.repository.LocationRepository;
+import ru.yandex.practicum.repository.UserRepository;
+import ru.yandex.practicum.repository.UserRequestRepository;
 import ru.yandex.practicum.service.EventService;
 
 import java.time.LocalDateTime;
@@ -269,6 +281,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public EventFullDto getEventById(Long id, StatsSaveRequestDto statsSaveRequestDto) {
         Event event = checkEventInDB(id);
         if (event.getState() != EventState.PUBLISHED) {
@@ -279,6 +292,20 @@ public class EventServiceImpl implements EventService {
         EventFullDto fullDto = eventMapper.toEventFullDto(event);
         updDtoStatsViews(fullDto, new EventSearchParam(LocalDateTime.now().minusDays(3), LocalDateTime.now().plusDays(3)));
         return fullDto;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<EventShortDto> getFollowEvent(Long userId) {
+        User user = checkUserInDataBase(userId);
+        List<Long> followingIds = user.getFollowing()
+                .stream()
+                .map(User::getId)
+                .toList();
+        return eventRepository.findByStateIsAndInitiatorIdIn(EventState.PUBLISHED, followingIds)
+                .stream()
+                .map(eventMapper::toEventShortDto)
+                .toList();
     }
 
     private void checkText(String str) {
