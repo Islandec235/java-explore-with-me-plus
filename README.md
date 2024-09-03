@@ -36,17 +36,18 @@ Explore With Me Plus — это расширенное приложение дл
 ## Установка и запуск
 
 1. Клонируйте репозиторий и перейдите в каталог проекта:
-  
-       git clone https://github.com/Islandec235/java-explore-with-me-plus.git
-   
-   Затем:
-   
-       cd java-explore-with-me-plus
-   
+   ```bash
+   git clone https://github.com/Islandec235/java-explore-with-me-plus.git
+   ```
+
+   ```bash
+   cd java-explore-with-me-plus
+   ```
+
 3. Соберите и запустите контейнеры:
-  
-       docker-compose up --build
-   
+   ```bash
+   docker-compose up --build
+    ```
 4. Приложение будет доступно по адресу:
   
    http://localhost:8080
