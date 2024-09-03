@@ -1,5 +1,7 @@
 package ru.yandex.practicum.controller.adm;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,10 +23,13 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/admin/events")
+@Tag(name = "Admin: События", description = "API для работы с событиями")
 public class AdminEventController {
     private final EventService service;
 
     @GetMapping
+    @Operation(summary = "Поиск событий",
+            description = "Возвращает полную информацию обо всех событиях подходящих под переданные условия")
     public List<EventFullDto> searchEvents(
             @RequestParam(required = false) List<Long> users,
             @RequestParam(required = false) List<EventState> states,
@@ -41,6 +46,7 @@ public class AdminEventController {
 
     @PatchMapping("/{eventId}")
     @Transactional
+    @Operation(summary = "Редактирование события", description = "Редактирование данных любого события администратором")
     public EventFullDto adminChangeEvent(
             @PathVariable Long eventId,
             @RequestBody @Valid UpdateEventAdminRequest eventDto) {
